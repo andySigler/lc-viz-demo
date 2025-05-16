@@ -1,5 +1,5 @@
-const labwareDir = "/shared-data/labware/";
-const liquidClassDir = "/shared-data/liquid-class/";
+const labwareDir = "shared-data/labware/";
+const liquidClassDir = "shared-data/liquid-class/";
 
 const water = "water";
 const ethanol80 = "ethanol_80";
