@@ -18,7 +18,8 @@ async function showMeHowYouTransfer(target, liquidName, tipName, pipetteName, sr
 
   // vessels (built using sharedData + keyFrames)
   const aspirateWellVessel = new WellVessel(loadedSrc.transitionPoints, 0.25);
-  aspirateWellVessel.createCanvasPlastic("container-zzz")
+  aspirateWellVessel.createCanvasPlastic("container-zzz");
+  aspirateWellVessel.canvasPlastic.background(0, 0, 0);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

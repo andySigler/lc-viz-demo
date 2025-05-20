@@ -1,47 +1,4 @@
-/*
-A vessel represents either the Tip or Well.
-
-Holds multiple canvases:
- - 1x canvas for static image
- - 1x canvas for EACH time-graph
-   * Aspirate, Dispense, Dispense, etc.
-
-Information not yet available:
- - canvas size
-   * height = mm/pixel
-   * width = seconds ()
-
-*/
-
-
-export function createCanvasContext(width, height, parentId) {
-  const cWidth = Math.floor(width);
-  const cHeight = Math.floor(height);
-
-  const canvas = document.createElement('canvas');
-  canvas.width = cWidth;
-  canvas.height = cHeight;
-
-  const parent = document.getElementById(parentId);
-  if (!parent) {
-    console.warn(`Parent element with id "${parentId}" not found.`);
-    return null;
-  }
-
-  parent.appendChild(canvas);
-
-  const ctx = canvas.getContext('2d');
-
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, cWidth, cHeight);
-
-  return {
-    canvas,
-    ctx,
-    width: cWidth,
-    height: cHeight
-  };
-}
+import { Canvas2d } from './canvas.js';
 
 
 class Vessel {
@@ -80,7 +37,7 @@ class Vessel {
   }
 
   createCanvasPlastic(parentId) {
-    this.canvasPlastic = createCanvasContext(this.widthPx, this.heightPx, parentId);
+    this.canvasPlastic = new Canvas2d(this.widthPx, this.heightPx, parentId);
   }
 }
 

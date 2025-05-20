@@ -10,10 +10,8 @@ export function applyMouseControls(canvas, canvasName = 'unknown') {
     console.log(`${canvasName}: ${eventName}(x=${state.mouseX}, y=${state.mouseY}, inside=${state.mouseInside}, down=${state.mouseDown})`);
   };
 
-  const isInside = (x, y) => {
-    return x >= 0 && x <= canvas.width &&
-           y >= 0 && y <= canvas.height;
-  };
+  const isInside = (x, y) =>
+    x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height;
 
   const updateMouseState = (event, eventName, isDown) => {
     const rect = canvas.getBoundingClientRect();
@@ -21,7 +19,6 @@ export function applyMouseControls(canvas, canvasName = 'unknown') {
     const y = event.clientY - rect.top;
     const inside = isInside(x, y);
 
-    // Update state in-place
     state.mouseX = x;
     state.mouseY = y;
     state.mouseInside = inside;
@@ -29,25 +26,27 @@ export function applyMouseControls(canvas, canvasName = 'unknown') {
       state.mouseDown = isDown;
     }
 
-    const shouldLog = inside || state.mouseInside;
-    if (shouldLog) {
+    if (inside || state.mouseInside) {
       printState(eventName);
     }
   };
 
-  canvas.addEventListener('mousedown', (e) => {
-    updateMouseState(e, 'mousedown', true);
-  });
+  const eventHandlers = {
+    mousedown: (e) => updateMouseState(e, 'mousedown', true),
+    mouseup: (e) => updateMouseState(e, 'mouseup', false),
+    click: (e) => updateMouseState(e, 'click', false),
+    mousemove: (e) => updateMouseState(e, 'mousemove')
+  };
 
-  canvas.addEventListener('mouseup', (e) => {
-    updateMouseState(e, 'mouseup', false);
-  });
+  for (const [event, handler] of Object.entries(eventHandlers)) {
+    canvas.addEventListener(event, handler);
+  }
 
-  canvas.addEventListener('click', (e) => {
-    updateMouseState(e, 'click', false);
-  });
+  const removeEventHandlers = () => {
+    for (const [event, handler] of Object.entries(eventHandlers)) {
+      canvas.removeEventListener(event, handler);
+    }
+  };
 
-  canvas.addEventListener('mousemove', (e) => {
-    updateMouseState(e, 'mousemove');
-  });
+  return { state, removeEventHandlers };
 }
