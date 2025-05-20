@@ -109,7 +109,7 @@ export class Canvas2d {
     this.ctx.translate(this.canvas.width / 2, this.canvas.height);
     this.stroke(0, 0, 0);
     this.strokeWidth(1);
-    this.noFill();
+    this.fill(255, 255, 255);
     this.ctx.beginPath();
     this.ctx.moveTo(-transitionPoints[0].width / 2, -transitionPoints[0].mmFromBottom);
     for (let i = 1; i < transitionPoints.length; i++) {
