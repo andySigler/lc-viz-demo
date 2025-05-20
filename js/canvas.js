@@ -22,6 +22,14 @@ export class Canvas2d {
     this.canvas = null;
   }
 
+  save() {
+    this.ctx.save();
+  }
+
+  restore() {
+    this.ctx.restore();
+  }
+
   static createCanvas(width, height, parentId) {
     const parent = document.getElementById(parentId);
     if (!parent) {
@@ -35,13 +43,21 @@ export class Canvas2d {
     return { canvas, state, removeEventHandlers };
   }
 
-  stroke(r, g, b, a = 1.0) {
-    this.ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+  translate(x, y) {
+    this.ctx.translate(x, y);
+  }
+
+  strokeWidth(width) {
+    this.ctx.lineWidth = width;
+  }
+
+  stroke(r, g, b) {
+    this.ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
     this.doStroke = true;
   }
 
-  fill(r, g, b, a = 1.0) {
-    this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
+  fill(r, g, b) {
+    this.ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
     this.doFill = true;
   }
 
@@ -63,15 +79,28 @@ export class Canvas2d {
   }
 
   rect(x, y, w, h) {
+    this.ctx.save();
     this.ctx.beginPath();
     this.ctx.rect(x, y, w, h);
     this.fillAndStrokeIfEnabled();
     this.ctx.closePath();
+    this.ctx.restore();
   }
 
-  background(r, g, b, a = 1.0) {
+  circle(x, y, radius) {
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.ellipse(x, y, radius, radius, 0, Math.PI * 2, false);
+    this.fillAndStrokeIfEnabled();
+    this.ctx.closePath();
+    this.ctx.restore();
+  }
+
+  background(r, g, b) {
+    this.ctx.save();
     this.noStroke();
-    this.fill(r, g, b, a);
-    this.rect(r, g, this.canvas.width, this.canvas.height)
+    this.fill(r, g, b);
+    this.rect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.restore();
   }
 }

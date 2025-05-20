@@ -26,6 +26,50 @@ export const reservoir15ml = "nest_12_reservoir_15ml";
 export const reservoir290ml = "nest_1_reservoir_290ml";
 
 
+class TransitionPoint {
+  constructor(mmFromBottom, width, uLFromBottom) {
+    this.mmFromBottom = mmFromBottom;
+    this.width = width;
+    this.uLFromBottom = uLFromBottom;
+  }
+
+  asPixels(mmPerPixel) {
+    return new TransitionPoint(
+      this.mmFromBottom / mmPerPixel,
+      this.width / mmPerPixel,
+      this.uLFromBottom / mmPerPixel
+    );
+  }
+
+  static buildFromSection(s, uL, isTop = false) {
+    if (!isTop) {
+      if (s.shape === "conical") {
+        return new TransitionPoint(s.bottomHeight, s.bottomDiameter, uL);
+      }
+      else if (s.shape === "cuboidal") {
+        return new TransitionPoint(s.bottomHeight, s.bottomXDimension, uL);
+      }
+      else if (s.shape === "spherical") {
+        return new TransitionPoint(0.0, 0.0, uL);  // NOTE: ignoring spheres
+      }
+      else {
+        throw new Error(`unexpected shape: ${s.shape}`);
+      }
+    }
+    else {
+      if (s.shape === "conical") {
+        return new TransitionPoint(s.topHeight, s.topDiameter, uL);
+      }
+      else if (s.shape === "cuboidal") {
+        return new TransitionPoint(s.topHeight, s.topXDimension, uL);
+      }
+      else {
+        throw new Error(`unexpected shape: ${s.shape}`);
+      }
+    }
+  }
+}
+
 
 async function _loadJSON(path) {
   const response = await fetch(path);
@@ -37,82 +81,93 @@ async function _loadJSON(path) {
 
 
 export async function loadLiquid(liquidName, pipetteName, tipName) {
-    const liquidDef = await _loadJSON(`${liquidClassDir}${liquidName}.json`);
-    let byPipette = liquidDef.byPipette;
-    for (let i = 0; i < byPipette.length; i++) {
-        if (byPipette[i].pipetteModel === pipetteName) {
-            let byTip = byPipette[i].byTipType;
-            for (let n = 0; n < byTip.length; n++) {
-                if (byTip[n].tiprack == `opentrons/${tipName}/1`) {
-                    return byTip[n];
-                }
-            }
+  const liquidDef = await _loadJSON(`${liquidClassDir}${liquidName}.json`);
+  let byPipette = liquidDef.byPipette;
+  for (let i = 0; i < byPipette.length; i++) {
+    if (byPipette[i].pipetteModel === pipetteName) {
+      let byTip = byPipette[i].byTipType;
+      for (let n = 0; n < byTip.length; n++) {
+        if (byTip[n].tiprack == `opentrons/${tipName}/1`) {
+          return byTip[n];
         }
+      }
     }
-    throw new Error(`unable to find ${liquidName} settings`);
+  }
+  throw new Error(`unable to find ${liquidName} settings`);
 }
 
 
 export async function loadWell(name) {
-    const labwareDef = await _loadJSON(`${labwareDir}${name}.json`);
-    let well = labwareDef.wells.A1;
-    well.loadName = name;
+  const labwareDef = await _loadJSON(`${labwareDir}${name}.json`);
+  let well = labwareDef.wells.A1;
+  well.loadName = name;
 
-    // NOTE: converting innerWellGeometries to "transitionPoints"
-    //       to make it simpler for me (sigler)
-    let sections = undefined;
-    if (labwareDef.innerLabwareGeometry.flatWell) {
-        sections = labwareDef.innerLabwareGeometry.flatWell.sections;
-    }
-    else if (labwareDef.innerLabwareGeometry.cuboidalWell) {
-        sections = labwareDef.innerLabwareGeometry.cuboidalWell.sections;
-    }
-    else if (labwareDef.innerLabwareGeometry.conicalWell) {
-        sections = labwareDef.innerLabwareGeometry.conicalWell.sections;
-    }
-    else {
-        throw new Error("found a innerLabwareGeometry section we do not yet support");
-    }
-    sections.sort((a, b) => a.bottomHeight - b.bottomHeight);
-    well.transitionPoints = []
-    for (let section in sections) {
-        well.transitionPoints.push([section.bottomHeight, section.bottomXDimension])
-    }
-    const last = sections[sections.length - 1];
-    well.transitionPoints.push([last.topHeight, last.topXDimension]);
+  // NOTE: converting innerWellGeometries to "transitionPoints"
+  //       to make it simpler for me (sigler)
+  let sections = undefined;
+  if (labwareDef.innerLabwareGeometry.flatWell) {
+    sections = labwareDef.innerLabwareGeometry.flatWell.sections;
+  }
+  else if (labwareDef.innerLabwareGeometry.cuboidalWell) {
+    sections = labwareDef.innerLabwareGeometry.cuboidalWell.sections;
+  }
+  else if (labwareDef.innerLabwareGeometry.conicalWell) {
+    sections = labwareDef.innerLabwareGeometry.conicalWell.sections;
+  }
+  else {
+    throw new Error("found a innerLabwareGeometry section we do not yet support");
+  }
+  sections.sort((a, b) => a.bottomHeight - b.bottomHeight);
 
-    return labwareDef.wells.A1;
+  // TODO: don't fake this, get real numbers by simulating API
+  let uLAdder = well.totalLiquidVolume / sections.length;
+  let uLCounter = 0.0;
+
+  well.transitionPoints = []
+  for (let i = 0; i < sections.length; i++) {
+    well.transitionPoints.push(
+      TransitionPoint.buildFromSection(sections[i], uLCounter, false)
+    );
+    uLCounter += uLAdder;  // TODO: don't fake this
+  }
+  well.transitionPoints.push(
+    TransitionPoint.buildFromSection(
+      sections[sections.length - 1], well.totalLiquidVolume, true
+    )
+  );
+  return well;
 }
 
 
 export function getTip(name) {
-    if (name == t50) {
-        return {
-            "totalLiquidVolume": 50.0,
-            "transitionPoints": [
-                [0.0, 1.0],
-                [50.0, 6.0]
-            ]
-        };
-    }
-    else if (name == t200) {
-        return {
-            "totalLiquidVolume": 200.0,
-            "transitionPoints": [
-                [0.0, 2.0],
-                [50.0, 6.0]
-            ]
-        };
-    }
-    else if (name == t1000) {
-        return {
-            "totalLiquidVolume": 1000.0,
-            "transitionPoints": [
-                [0.0, 3.0],
-                [70.0, 6.0]
-            ]
-        };
-    }
+  // TODO: don't fake this, get real numbers from either Starno or Smith
+  if (name == t50) {
+    return {
+      "totalLiquidVolume": 50.0,
+      "transitionPoints": [
+        new TransitionPoint(0.0, 1.0, 0.0),
+        new TransitionPoint(50.0, 6.0, 50.0)
+      ]
+    };
+  }
+  else if (name == t200) {
+    return {
+      "totalLiquidVolume": 200.0,
+      "transitionPoints": [
+        new TransitionPoint(0.0, 1.0, 0.0),
+        new TransitionPoint(50.0, 6.0, 200.0)
+      ]
+    };
+  }
+  else if (name == t1000) {
+    return {
+      "totalLiquidVolume": 1000.0,
+      "transitionPoints": [
+        new TransitionPoint(0.0, 1.0, 0.0),
+        new TransitionPoint(70.0, 6.0, 1000.0)
+      ]
+    };
+  }
 }
 
 

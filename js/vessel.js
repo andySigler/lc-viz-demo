@@ -21,11 +21,11 @@ class Vessel {
   }
 
   get widthMm() {
-    return this.transitionPoints[this.transitionPoints.length - 1][1];
+    return this.transitionPoints[this.transitionPoints.length - 1].width;
   }
 
   get heightMm() {
-    return this.transitionPoints[this.transitionPoints.length - 1][0];
+    return this.transitionPoints[this.transitionPoints.length - 1].mmFromBottom;
   }
 
   get widthPx() {
@@ -38,6 +38,23 @@ class Vessel {
 
   createCanvasPlastic(parentId) {
     this.canvasPlastic = new Canvas2d(this.widthPx, this.heightPx, parentId);
+  }
+
+  drawFromKeyFrame(keyFrame) {
+    this.canvasPlastic.save();
+    this.canvasPlastic.background(200, 200, 200);
+    // first draw the liquid as a rectangle over the background
+    // then draw outline shape
+    this.canvasPlastic.translate(this.widthPx / 2, this.heightPx);
+    this.canvasPlastic.noStroke();
+    this.canvasPlastic.fill(0, 0, 0)
+    for (let tp of this.transitionPoints) {
+      console.log(tp)
+      let tpPixels = tp.asPixels(this.millimetersPerPixel);
+      this.canvasPlastic.circle(-tpPixels.width / 2, -tpPixels.mmFromBottom, 4);
+      this.canvasPlastic.circle(tpPixels.width / 2, -tpPixels.mmFromBottom, 4);
+    }
+    this.canvasPlastic.restore();
   }
 }
 
