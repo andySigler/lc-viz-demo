@@ -1,3 +1,5 @@
+import { getDelaySeconds, calcValueByVolume, getMixCount, getMixVolume } from './sharedData.js';
+
 class SimWell {
   constructor(well, liquidVolume) {
     this.totalLiquidVolume = well.totalLiquidVolume;
@@ -34,7 +36,7 @@ class SimTip {
 }
 
 
-class SimContext {
+export class SimContext {
   constructor(target, liquid, tip, pipetteName, srcWell, dstWell, srcVolume, dstVolume) {
     this.target = target;
     this.liquid = liquid;
@@ -131,7 +133,7 @@ function calcTipMmFromBottom(well, position) {
 }
 
 
-class AspirateSubmerge extends SubmergeTipAction {
+export class AspirateSubmerge extends SubmergeTipAction {
   constructor(simContext) {
     let aspProps = simContext.liquid.aspirate;
     let tipStart = calcTipMmFromBottom(simContext.srcWell, aspProps.submerge.startPosition);
@@ -142,7 +144,7 @@ class AspirateSubmerge extends SubmergeTipAction {
   }
 }
 
-class AspirateLiquid extends LiquidAction {
+export class AspirateLiquid extends LiquidAction {
   constructor(simContext) {
     let aspProps = simContext.liquid.aspirate;
     let tipEnd = calcTipMmFromBottom(simContext.srcWell, aspProps.aspiratePosition);
@@ -155,7 +157,7 @@ class AspirateLiquid extends LiquidAction {
   }
 }
 
-class AspirateRetract extends RetractTipAction {
+export class AspirateRetract extends RetractTipAction {
   constructor(simContext) {
     let aspProps = simContext.liquid.aspirate;
     let tipStart = calcTipMmFromBottom(simContext.srcWell, aspProps.aspiratePosition);
@@ -167,7 +169,7 @@ class AspirateRetract extends RetractTipAction {
   }
 }
 
-class SingleDispenseSubmerge extends SubmergeTipAction {
+export class SingleDispenseSubmerge extends SubmergeTipAction {
   constructor(simContext) {
     let dispProps = simContext.liquid.singleDispense;
     let tipStart = calcTipMmFromBottom(simContext.dstWell, dispProps.submerge.startPosition);
@@ -178,7 +180,7 @@ class SingleDispenseSubmerge extends SubmergeTipAction {
   }
 }
 
-class SingleDispenseLiquid extends LiquidAction {
+export class SingleDispenseLiquid extends LiquidAction {
   constructor(simContext) {
     let dispProps = simContext.liquid.singleDispense;
     let tipEnd = calcTipMmFromBottom(simContext.dstWell, dispProps.dispensePosition);
@@ -192,7 +194,7 @@ class SingleDispenseLiquid extends LiquidAction {
   }
 }
 
-class SingleDispenseRetract extends RetractTipAction {
+export class SingleDispenseRetract extends RetractTipAction {
   constructor(simContext) {
     let dispProps = simContext.liquid.singleDispense;
     let tipStart = calcTipMmFromBottom(simContext.dstWell, dispProps.dispensePosition);

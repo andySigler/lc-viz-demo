@@ -1,3 +1,6 @@
+import { AspirateSubmerge, AspirateLiquid, AspirateRetract } from './simulate.js';
+import { SingleDispenseSubmerge, SingleDispenseLiquid, SingleDispenseRetract } from './simulate.js';
+
 class KeyFrame {
   constructor(time, tipZ, liquidInTipHeight, airInTipHeight, liquidInWellHeight) {
     this.time = time;
@@ -20,6 +23,9 @@ class KeyFrameGenerator {
   }
 
   add(duration, tipZ) {
+    if (duration === 0.0 && this.keyFrames.length > 0) {
+      return;
+    }
     this.time += duration;
     let wellLiqHeight = 0.0;
     if (this.isAspirate) {
@@ -74,7 +80,7 @@ class KeyFrameGenerator {
   }
 }
 
-class AspirateGenerator extends KeyFrameGenerator {
+export class AspirateKeyFrameGenerator extends KeyFrameGenerator {
   constructor(simContext) {
     let submerge = new AspirateSubmerge(simContext);
     let liquid = new AspirateLiquid(simContext);
@@ -86,7 +92,7 @@ class AspirateGenerator extends KeyFrameGenerator {
   }
 }
 
-class SingleDispenseGenerator extends KeyFrameGenerator {
+export class SingleDispenseKeyFrameGenerator extends KeyFrameGenerator {
   constructor(simContext) {
     let submerge = new SingleDispenseSubmerge(simContext);
     let liquid = new SingleDispenseLiquid(simContext);
@@ -95,29 +101,5 @@ class SingleDispenseGenerator extends KeyFrameGenerator {
   }
   generate() {
     return this.generateKeyFrames();
-  }
-}
-
-
-class TipView {
-  constructor(tip, well, wellVolume, keyFrames) {
-    this.tip = tip;
-    this.well = well;
-    this.wellVolume = wellVolume;
-    this.keyFrames = keyFrames;
-  }
-}
-
-class AspirateView extends TipView {
-  constructor(tip, well, wellVolume, ctx) {
-    let aspGen = new AspirateGenerator(ctx);
-    super(tip, well, wellVolume, aspGen.generate());
-  }
-}
-
-class SingleDispenseView extends TipView {
-  constructor(tip, well, wellVolume, ctx) {
-    let dspGen = new SingleDispenseGenerator(ctx);
-    super(tip, well, wellVolume, dspGen.generate());
   }
 }
