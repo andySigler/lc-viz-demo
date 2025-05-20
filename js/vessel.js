@@ -41,20 +41,14 @@ class Vessel {
   }
 
   drawFromKeyFrame(keyFrame) {
-    this.canvasPlastic.save();
     this.canvasPlastic.background(200, 200, 200);
     // first draw the liquid as a rectangle over the background
     // then draw outline shape
-    this.canvasPlastic.translate(this.widthPx / 2, this.heightPx);
-    this.canvasPlastic.noStroke();
-    this.canvasPlastic.fill(0, 0, 0)
+    const tPointsPixels = [];
     for (let tp of this.transitionPoints) {
-      console.log(tp)
-      let tpPixels = tp.asPixels(this.millimetersPerPixel);
-      this.canvasPlastic.circle(-tpPixels.width / 2, -tpPixels.mmFromBottom, 4);
-      this.canvasPlastic.circle(tpPixels.width / 2, -tpPixels.mmFromBottom, 4);
+      tPointsPixels.push(tp.asPixels(this.millimetersPerPixel));
     }
-    this.canvasPlastic.restore();
+    this.canvasPlastic.drawOutline(tPointsPixels);
   }
 }
 

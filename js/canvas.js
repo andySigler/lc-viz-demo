@@ -103,4 +103,25 @@ export class Canvas2d {
     this.rect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.restore();
   }
+
+  drawOutline(transitionPoints) {
+    this.ctx.save();
+    this.ctx.translate(this.canvas.width / 2, this.canvas.height);
+    this.stroke(0, 0, 0);
+    this.strokeWidth(1);
+    this.noFill();
+    this.ctx.beginPath();
+    this.ctx.moveTo(-transitionPoints[0].width / 2, -transitionPoints[0].mmFromBottom);
+    for (let i = 1; i < transitionPoints.length; i++) {
+      console.log(-transitionPoints[i].width / 2, -transitionPoints[i].mmFromBottom)
+      this.ctx.lineTo(-transitionPoints[i].width / 2, -transitionPoints[i].mmFromBottom);
+    }
+    for (let i = transitionPoints.length - 1; i >= 0; i--) {
+      this.ctx.lineTo(transitionPoints[i].width / 2, -transitionPoints[i].mmFromBottom);
+    }
+    this.ctx.lineTo(-transitionPoints[0].width / 2, -transitionPoints[0].mmFromBottom);
+    this.fillAndStrokeIfEnabled();
+    this.ctx.closePath();
+    this.ctx.restore();
+  }
 }
