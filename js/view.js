@@ -104,22 +104,27 @@ export class View {
       isWell,
     )
 
-    if (aspDuration) {
+
+    if (!isWell) {
       vessel.createCanvasForAction("aspirate", this.parentId);
-    }
-    vessel.createCanvasPlastic(this.parentId);
-    if (dispDuration) {
-      vessel.createCanvasForAction("singleDispense", this.parentId);
-    }
-
-
-    if (aspDuration) {
+      vessel.drawAction("aspirate", this.aspirateKeyFrames);
+      vessel.createCanvasPlastic(this.parentId);
       vessel.drawPlastic(this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1]);
+      vessel.createCanvasForAction("singleDispense", this.parentId);
+      vessel.drawAction("singleDispense", this.singleDispenseKeyFrames);
     }
-    else {
-      vessel.drawPlastic(this.singleDispenseKeyFrames[0]);
+    else if (aspDuration) {
+      vessel.createCanvasPlastic(this.parentId);
+      vessel.drawPlastic(this.aspirateKeyFrames[0]);
+      vessel.createCanvasForAction("aspirate", this.parentId);
+      vessel.drawAction("aspirate", this.aspirateKeyFrames);
     }
-    vessel.drawActions();
+    else if (dispDuration) {
+      vessel.createCanvasForAction("singleDispense", this.parentId);
+      vessel.drawAction("singleDispense", this.singleDispenseKeyFrames);
+      vessel.createCanvasPlastic(this.parentId);
+      vessel.drawPlastic(this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1]);
+    }
     return vessel;
   }
 

@@ -120,4 +120,30 @@ export class Canvas2d {
     this.ctx.closePath();
     this.ctx.restore();
   }
+
+  drawKeyFrames(keyFrames, isWell) {
+
+    const drawLinesAtHeights = (heights) => {
+      this.ctx.save();
+      this.translate(0.0, this.canvas.height);  // bottom-left corner (starting position)
+      this.ctx.beginPath();
+      for (let i in heights) {
+        this.ctx.lineTo(keyFrames[i].time, -heights[i]);
+        this.ctx.lineTo(keyFrames[i].time, 0);
+        this.ctx.lineTo(keyFrames[i].time, -heights[i]);
+      }
+      this.fillAndStrokeIfEnabled();
+      this.ctx.restore();
+    }
+
+    const liquidHeights = [];
+    const airHeights = [];
+    for (let kf of keyFrames) {
+      liquidHeights.push(kf.liquidHeight(isWell))
+      airHeights.push(kf.airHeight(isWell))
+    }
+
+    drawLinesAtHeights(liquidHeights);
+    drawLinesAtHeights(airHeights);
+  }
 }

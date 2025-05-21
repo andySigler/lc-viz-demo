@@ -58,7 +58,10 @@ export class Vessel {
     this.isWell = isWell;
 
     this.canvasPlastic = undefined;
-    this.canvasesActions = [];
+    this.canvasesActions = {
+      "aspirate": undefined,
+      "singleDispense": undefined
+    };
   }
 
   get widthMm() {
@@ -95,8 +98,10 @@ export class Vessel {
       } 
       widthPx = this.singleDispenseDuration / this.secondsPerPixel;
     }
-    // TODO: create a new canvas for Aspirate or SingleDispense
-    this.canvasesActions.push(new Canvas2d(widthPx, this.heightPx, parentId))
+    else {
+      throw new Error(`unexpected action: ${action}`);
+    }
+    this.canvasesActions[action] = new Canvas2d(widthPx, this.heightPx, parentId);
   }
 
   remove() {
@@ -114,17 +119,13 @@ export class Vessel {
     // vessel outline (in pixels)
     const outlineTransitionPoints = [];
     for (let tp of this.transitionPoints) {
-      const tpAsPixels = tp.asPixels(this.millimetersPerPixel);
+      const tpAsPixels = tp.asPixels(this.millimetersPerPixel, 1.0);
       outlineTransitionPoints.push(tpAsPixels);
     }
     // liquid outline (in pixels)
-    const kfAsPixels = keyFrame.asPixels(this.millimetersPerPixel);
-    const liqHeightPixels = this.isWell
-      ? kfAsPixels.liquidInWellHeight
-      : kfAsPixels.liquidInTipHeight;
-    const airHeightPixels = this.isWell
-      ? 0.0
-      : kfAsPixels.airInTipHeight;
+    const kfAsPixels = keyFrame.asPixels(this.millimetersPerPixel, 1.0);
+    const liqHeightPixels = kfAsPixels.liquidHeight(this.isWell)
+    const airHeightPixels = kfAsPixels.airHeight(this.isWell)
     const liquidTransitionPoints = clipDistanceFromBottom(
       outlineTransitionPoints, airHeightPixels, liqHeightPixels
     );
@@ -140,9 +141,20 @@ export class Vessel {
     this.canvasPlastic.drawTransitionPoints(liquidTransitionPoints);
   }
 
-  drawActions() {
-    for (let canvas of this.canvasesActions) {
-      canvas.background(100, 200, 200);
+  drawAction(action, keyFrames) {
+    const canvas = this.canvasesActions[action];
+    if (!canvas) {
+      throw new Error(`unexpected action: ${action}`);
     }
+    canvas.background(255, 255, 255);
+    const keyFramesPixels = [];
+    for (let frame of keyFrames) {
+      const kfPix = frame.asPixels(this.millimetersPerPixel, this.secondsPerPixel);
+      keyFramesPixels.push(kfPix);
+    }
+    canvas.stroke(0, 0, 0);
+    canvas.noFill();
+    console.log(keyFramesPixels)
+    canvas.drawKeyFrames(keyFramesPixels, this.isWell);
   }
 }

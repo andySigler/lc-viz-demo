@@ -10,14 +10,28 @@ class KeyFrame {
     this.liquidInWellHeight = liquidInWellHeight;
   }
 
-  asPixels(mmPerPixel) {
+  asPixels(mmPerPixel, secondsPerPixel) {
     return new KeyFrame(
-      this.time,
+      this.time / secondsPerPixel,
       this.tipZ / mmPerPixel,
       this.liquidInTipHeight / mmPerPixel,
       this.airInTipHeight / mmPerPixel,
       this.liquidInWellHeight / mmPerPixel,
     )
+  }
+
+  liquidHeight(isWell) {
+    if (isWell) {
+      return this.liquidInWellHeight;
+    }
+    return this.liquidInTipHeight;
+  }
+
+  airHeight(isWell) {
+    if (isWell) {
+      return 0.0;
+    }
+    return this.airInTipHeight;
   }
 }
 
