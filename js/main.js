@@ -1,11 +1,14 @@
-import { t50, p50S, well2ml, well360ul } from './sharedData.js';
+import { defaultView } from './defaults.js';
 import { View } from './view.js';
 
 
-const main = async () => {
-  const view = new View(10, "water", t50, p50S, well2ml, well360ul, 1000.0, 0.0);
-  await view.initialize();
-}
+const parentNodeId = "container";
+const mmPerPixel = 0.15;
 
+
+const main = async () => {
+  const view = new View(defaultView);
+  await view.initialize(parentNodeId, mmPerPixel);
+}
 
 document.addEventListener('DOMContentLoaded', main);

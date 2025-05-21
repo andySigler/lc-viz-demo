@@ -1,15 +1,35 @@
 import { loadLiquid, loadWell, getTip} from "./sharedData.js"
+import { SimContext } from "./simulate.js"
+import { AspirateKeyFrameGenerator, SingleDispenseKeyFrameGenerator } from "./keyFrame.js"
+import { WellVessel, TipVessel } from "./vessel.js";
 
-export class View {
-  constructor(target, liquidName, tipName, pipetteName, srcName, dstName, srcVolume, dstVolume) {
+
+export class ViewCfg {
+  constructor({
+    target,
+    liquidName,
+    tipName,
+    pipetteName,
+    srcName,
+    dstName,
+    srcStartVolume,
+    dstStartVolume
+  } = {}) {
     this.target = target;
     this.liquidName = liquidName;
     this.tipName = tipName;
     this.pipetteName = pipetteName;
-    this.scrName = srcName;
+    this.srcName = srcName;
     this.dstName = dstName;
-    this.srcVolume = srcVolume;
-    this.dstVolume = dstVolume;
+    this.srcStartVolume = srcStartVolume;
+    this.dstStartVolume = dstStartVolume;
+  }
+}
+
+
+export class View {
+  constructor(cfg) {
+    this.cfg = cfg;
 
     this.mmPerPixel = undefined;
     this.parentId = undefined;
@@ -33,14 +53,23 @@ export class View {
   }
 
   async loadFromSharedData() {
-    this.loadedLiquid = await loadLiquid(this.liquidName, this.pipetteName, this.tipName);
-    this.loadedSrc = await loadWell(this.srcName);
-    this.loadedDst = await loadWell(this.dstName);
-    this.loadedTip = getTip(this.tipName);
+    this.loadedLiquid = await loadLiquid(this.cfg.liquidName, this.cfg.pipetteName, this.cfg.tipName);
+    this.loadedSrc = await loadWell(this.cfg.srcName);
+    this.loadedDst = await loadWell(this.cfg.dstName);
+    this.loadedTip = getTip(this.cfg.tipName);
   }
 
   simulateAndGenerateKeyFrames() {
-    this.ctx = new SimContext(this.target, this.loadedLiquid, this.loadedTip, this.pipetteName, this.loadedSrc, this.loadedDst, this.srcVolume, this.dstVolume);
+    this.simulationCtx = new SimContext(
+      this.cfg.target,
+      this.loadedLiquid,
+      this.loadedTip,
+      this.cfg.pipetteName,
+      this.loadedSrc,
+      this.loadedDst,
+      this.cfg.srcStartVolume,
+      this.cfg.dstStartVolume
+    );
     this.aspirateKeyFrames = (new AspirateKeyFrameGenerator(this.simulationCtx)).generate();
     this.singleDispenseKeyFrames = (new SingleDispenseKeyFrameGenerator(this.simulationCtx)).generate();
   }
