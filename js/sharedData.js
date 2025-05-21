@@ -26,16 +26,16 @@ export const reservoir15ml = "nest_12_reservoir_15ml";
 export const reservoir290ml = "nest_1_reservoir_290ml";
 
 
-class TransitionPoint {
-  constructor(mmFromBottom, width, uLFromBottom) {
-    this.mmFromBottom = mmFromBottom;
+export class TransitionPoint {
+  constructor(distanceFromBottom, width, uLFromBottom) {
+    this.distanceFromBottom = distanceFromBottom;
     this.width = width;
     this.uLFromBottom = uLFromBottom;
   }
 
   asPixels(mmPerPixel) {
     return new TransitionPoint(
-      this.mmFromBottom / mmPerPixel,
+      this.distanceFromBottom / mmPerPixel,
       this.width / mmPerPixel,
       this.uLFromBottom / mmPerPixel
     );

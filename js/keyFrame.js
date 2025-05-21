@@ -9,6 +9,16 @@ class KeyFrame {
     this.airInTipHeight = airInTipHeight;
     this.liquidInWellHeight = liquidInWellHeight;
   }
+
+  asPixels(mmPerPixel) {
+    return new KeyFrame(
+      this.time,
+      this.tipZ / mmPerPixel,
+      this.liquidInTipHeight / mmPerPixel,
+      this.airInTipHeight / mmPerPixel,
+      this.liquidInWellHeight / mmPerPixel,
+    )
+  }
 }
 
 class KeyFrameGenerator {
