@@ -1,6 +1,7 @@
 import { loadLiquid, loadWell, getTip} from "./sharedData.js"
 import { SimContext } from "./simulate.js"
 import { AspirateKeyFrameGenerator, SingleDispenseKeyFrameGenerator } from "./keyFrame.js"
+import { Patterns } from "./canvas.js"
 import { Vessel } from "./vessel.js";
 
 
@@ -53,6 +54,8 @@ export class View {
     this.srcVessel = undefined;
     this.tipVessel = undefined;
     this.dstVessel = undefined;
+
+    this.patterns = new Patterns('rgb(0, 108, 250)', 'rgb(255, 255, 255)', 8, 1);
   }
 
   async loadFromSharedData() {
@@ -107,21 +110,21 @@ export class View {
 
     if (!isWell) {
       vessel.createCanvasForAction("aspirate", this.parentId);
-      vessel.drawAction("aspirate", this.aspirateKeyFrames);
+      vessel.drawAction("aspirate", this.aspirateKeyFrames, this.patterns);
       vessel.createCanvasPlastic(this.parentId);
       vessel.drawPlastic(this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1]);
       vessel.createCanvasForAction("singleDispense", this.parentId);
-      vessel.drawAction("singleDispense", this.singleDispenseKeyFrames);
+      vessel.drawAction("singleDispense", this.singleDispenseKeyFrames, this.patterns);
     }
     else if (aspDuration) {
       vessel.createCanvasPlastic(this.parentId);
       vessel.drawPlastic(this.aspirateKeyFrames[0]);
       vessel.createCanvasForAction("aspirate", this.parentId);
-      vessel.drawAction("aspirate", this.aspirateKeyFrames);
+      vessel.drawAction("aspirate", this.aspirateKeyFrames, this.patterns);
     }
     else if (dispDuration) {
       vessel.createCanvasForAction("singleDispense", this.parentId);
-      vessel.drawAction("singleDispense", this.singleDispenseKeyFrames);
+      vessel.drawAction("singleDispense", this.singleDispenseKeyFrames, this.patterns);
       vessel.createCanvasPlastic(this.parentId);
       vessel.drawPlastic(this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1]);
     }

@@ -1,6 +1,57 @@
 import { applyMouseControls } from './mouse.js';
 
 
+export class Patterns {
+  constructor(color, bgColor, gap, lineWidth) {
+    this.defaultColor = color;
+    this.backgroundColor = bgColor;
+    this.diagDown = this.createStripePattern('diagonal-down', gap * 0.66, 1);
+    this.horizontal = this.createStripePattern('horizontal', gap, lineWidth * 0.7);
+    this.diagUp = this.createStripePattern('diagonal-up', gap * 0.66, 1);
+  }
+
+  createStripePattern(orientation, gap, stripeWidth) {
+    let width = 8, height = 8;
+
+    if (orientation === 'horizontal') {
+      width = 1;
+      height = stripeWidth + gap;
+    }
+
+    const patternCanvas = document.createElement('canvas');
+    patternCanvas.width = width;
+    patternCanvas.height = height;
+    const ctx = patternCanvas.getContext('2d');
+
+    // Fill background
+    ctx.fillStyle = this.backgroundColor;
+    ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
+
+    ctx.strokeStyle = this.defaultColor;
+    ctx.lineWidth = stripeWidth;
+
+    if (orientation === 'horizontal') {
+      ctx.fillStyle = this.defaultColor;
+      ctx.fillRect(0, 0, 1, stripeWidth);
+    } else if (orientation === 'diagonal-down') {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(width, height);
+      ctx.stroke();
+    } else if (orientation === 'diagonal-up') {
+      ctx.beginPath();
+      ctx.moveTo(0, height);
+      ctx.lineTo(width, 0);
+      ctx.stroke();
+    } else {
+      throw new Error(`Unsupported stripe orientation: ${orientation}`);
+    }
+
+    return ctx.createPattern(patternCanvas, 'repeat');
+  }
+}
+
+
 export class Canvas2d {
   constructor(width, height, parentId) {
     this.width = Math.floor(width);
@@ -121,21 +172,7 @@ export class Canvas2d {
     this.ctx.restore();
   }
 
-  drawKeyFrames(keyFrames, isWell) {
-
-    const drawLinesAtHeights = (heights) => {
-      this.ctx.save();
-      this.translate(0.0, this.canvas.height);  // bottom-left corner (starting position)
-      this.ctx.beginPath();
-      for (let i in heights) {
-        this.ctx.lineTo(keyFrames[i].time, -heights[i]);
-        this.ctx.lineTo(keyFrames[i].time, 0);
-        this.ctx.lineTo(keyFrames[i].time, -heights[i]);
-      }
-      this.fillAndStrokeIfEnabled();
-      this.ctx.restore();
-    }
-
+  drawKeyFrames(keyFrames, isWell, patterns) {
     const liquidHeights = [];
     const airHeights = [];
     for (let kf of keyFrames) {
@@ -143,7 +180,51 @@ export class Canvas2d {
       airHeights.push(kf.airHeight(isWell))
     }
 
-    drawLinesAtHeights(liquidHeights);
-    drawLinesAtHeights(airHeights);
+    const liquidSections = [];
+    for (let i = 0; i < keyFrames.length - 1; i++) {
+      liquidSections.push({
+        "bottomLeft": [keyFrames[i].time, airHeights[i]],
+        "topLeft": [keyFrames[i].time, liquidHeights[i]],
+        "topRight": [keyFrames[i + 1].time, liquidHeights[i + 1]],
+        "bottomRight": [keyFrames[i + 1].time, airHeights[i + 1]],
+      })
+    }
+
+    let prevWasDiag = false;
+    for (let s of liquidSections) {
+      this.ctx.save();
+      this.ctx.translate(0, this.canvas.height);
+      this.ctx.beginPath();
+      this.ctx.moveTo(s.bottomLeft[0], -s.bottomLeft[1]);
+      this.ctx.lineTo(s.topLeft[0], -s.topLeft[1]);
+      this.ctx.lineTo(s.topRight[0], -s.topRight[1]);
+      this.ctx.lineTo(s.bottomRight[0], -s.bottomRight[1]);
+      this.ctx.closePath();
+      
+      const sWidth = s.topRight[0] - s.topLeft[0];
+      const diagPatternWidth = 8;
+      if (s.topLeft[1] < s.topRight[1]) {
+        this.ctx.fillStyle = patterns.diagUp;
+        prevWasDiag = true;
+        this.ctx.translate(sWidth - diagPatternWidth, 0);
+      }
+      else if (s.topLeft[1] > s.topRight[1]) {
+        this.ctx.fillStyle = patterns.diagDown;
+        prevWasDiag = true;
+        this.ctx.translate(sWidth - diagPatternWidth, 0);
+      }
+      else if (prevWasDiag && s.bottomRight[0] != keyFrames[keyFrames.length - 1].time) {
+        this.ctx.fillStyle = patterns.horizontal;
+        prevWasDiag = false;
+      }
+      else {
+        this.ctx.fillStyle = patterns.defaultColor;
+        prevWasDiag = false;
+      }
+
+      this.ctx.fill();
+      this.ctx.stroke();
+      this.ctx.restore();
+    }
   }
 }

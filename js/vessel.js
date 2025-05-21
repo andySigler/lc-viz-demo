@@ -137,24 +137,23 @@ export class Vessel {
     this.canvasPlastic.fill(255, 255, 255);
     this.canvasPlastic.drawTransitionPoints(outlineTransitionPoints);
     this.canvasPlastic.noStroke();
-    this.canvasPlastic.fill(100, 100, 255);
+    this.canvasPlastic.fill(0, 108, 250);
     this.canvasPlastic.drawTransitionPoints(liquidTransitionPoints);
   }
 
-  drawAction(action, keyFrames) {
+  drawAction(action, keyFrames, patterns) {
     const canvas = this.canvasesActions[action];
     if (!canvas) {
       throw new Error(`unexpected action: ${action}`);
     }
-    canvas.background(255, 255, 255);
     const keyFramesPixels = [];
     for (let frame of keyFrames) {
       const kfPix = frame.asPixels(this.millimetersPerPixel, this.secondsPerPixel);
       keyFramesPixels.push(kfPix);
     }
+    canvas.background(255, 255, 255);
     canvas.stroke(0, 0, 0);
-    canvas.noFill();
-    console.log(keyFramesPixels)
-    canvas.drawKeyFrames(keyFramesPixels, this.isWell);
+    canvas.fill(100, 100, 255);
+    canvas.drawKeyFrames(keyFramesPixels, this.isWell, patterns);
   }
 }
