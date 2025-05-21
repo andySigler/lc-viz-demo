@@ -16,22 +16,22 @@ class SimWell {
 class SimTip {
   constructor(tip) {
     this.length = tip.length;
-    this.maxVolume = tip.maxVolume;
+    this.totalLiquidVolume = tip.totalLiquidVolume;
     this.currentVolume = 0.0;
     this.currentAir = 0.0;
     this.currentBlowOut = 0.0
   }
 
   getCurrentAirHeight() {
-    return (this.currentAir / this.maxVolume) * this.length;
+    return (this.currentAir / this.totalLiquidVolume) * this.length;
   }
 
   getCurrentLiquidHeight() {
-    return this.getCurrentAirHeight() + (this.currentVolume / this.maxVolume) * this.length;
+    return this.getCurrentAirHeight() + (this.currentVolume / this.totalLiquidVolume) * this.length;
   }
 
   getCurrentBlowOutHeight() {
-    return (this.currentBlowOut / this.maxVolume) * this.length;
+    return (this.currentBlowOut / this.totalLiquidVolume) * this.length;
   }
 }
 

@@ -143,6 +143,7 @@ export function getTip(name) {
   // TODO: don't fake this, get real numbers from either Starno or Smith
   if (name == t50) {
     return {
+      "length": 50.0,
       "totalLiquidVolume": 50.0,
       "transitionPoints": [
         new TransitionPoint(0.0, 1.0, 0.0),
@@ -152,6 +153,7 @@ export function getTip(name) {
   }
   else if (name == t200) {
     return {
+      "length": 50.0,
       "totalLiquidVolume": 200.0,
       "transitionPoints": [
         new TransitionPoint(0.0, 1.0, 0.0),
@@ -161,6 +163,7 @@ export function getTip(name) {
   }
   else if (name == t1000) {
     return {
+      "length": 70.0,
       "totalLiquidVolume": 1000.0,
       "transitionPoints": [
         new TransitionPoint(0.0, 1.0, 0.0),

@@ -48,22 +48,13 @@ function clipDistanceFromBottom(transitionPoints, min, max) {
 
 
 class Vessel {
-  constructor(transitionPoints, millimetersPerPixel) {
+  constructor(transitionPoints, millimetersPerPixel, isWell) {
     this.transitionPoints = transitionPoints;
     this.millimetersPerPixel = millimetersPerPixel;
-    this.canvasPlastic = undefined;
-    this.canvasActions = [];
-  }
+    this.isWell = isWell;
 
-  remove() {
-    if (this.canvasPlasic) {
-      this.canvasPlasic.remove();
-    }
-    for (let c in this.canvasActions) {
-      c.remove()
-    }
-    this.canvasPlasic = undefined;
-    this.canvasActions = [];
+    this.canvasPlastic = undefined;
+    this.canvasesActions = [];
   }
 
   get widthMm() {
@@ -86,7 +77,22 @@ class Vessel {
     this.canvasPlastic = new Canvas2d(this.widthPx, this.heightPx, parentId);
   }
 
-  drawFromKeyFrame(keyFrame, isWell = true) {
+  createCanvasAction() {
+    // TODO: create a new canvas for Aspirate or SingleDispense
+  }
+
+  remove() {
+    if (this.canvasPlasic) {
+      this.canvasPlasic.remove();
+    }
+    this.canvasPlasic = undefined;
+    for (let c of this.canvasesActions) {
+      c.remove();
+    }
+    this.canvasesActions = [];
+  }
+
+  drawPlastic(keyFrame) {
     // vessel outline (in pixels)
     const outlineTransitionPoints = [];
     for (let tp of this.transitionPoints) {
@@ -95,16 +101,15 @@ class Vessel {
     }
     // liquid outline (in pixels)
     const kfAsPixels = keyFrame.asPixels(this.millimetersPerPixel);
-    const liqHeightPixels = isWell
+    const liqHeightPixels = this.isWell
       ? kfAsPixels.liquidInWellHeight
       : kfAsPixels.liquidInTipHeight;
-    const airHeightPixels = isWell
+    const airHeightPixels = this.isWell
       ? 0.0
       : kfAsPixels.airInTipHeight;
     const liquidTransitionPoints = clipDistanceFromBottom(
       outlineTransitionPoints, airHeightPixels, liqHeightPixels
     );
-    console.log(liquidTransitionPoints)
     // draw
     this.canvasPlastic.background(0, 0, 0);
     this.canvasPlastic.stroke(0, 0, 0);
@@ -120,10 +125,12 @@ class Vessel {
 
 export class WellVessel extends Vessel {
   constructor(transitionPoints, millimetersPerPixel) {
-    super(transitionPoints, millimetersPerPixel);
+    super(transitionPoints, millimetersPerPixel, true);
   }
+}
 
-  draw(keyFrame) {
-    this.drawFromKeyFrame(keyFrame, true);
+export class TipVessel extends Vessel {
+  constructor(transitionPoints, millimetersPerPixel) {
+    super(transitionPoints, millimetersPerPixel, false);
   }
 }
