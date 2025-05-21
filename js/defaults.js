@@ -3,7 +3,7 @@ import { ViewCfg } from './view.js';
 
 
 export const defaultView = new ViewCfg({
-  target: 10,
+  target: 40,
   liquidName: "water",
   tipName: t50,
   pipetteName: p50S,

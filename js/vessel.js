@@ -47,10 +47,14 @@ function clipDistanceFromBottom(transitionPoints, min, max) {
 }
 
 
-class Vessel {
-  constructor(transitionPoints, millimetersPerPixel, isWell) {
+export class Vessel {
+  constructor(name, transitionPoints, millimetersPerPixel, aspirateDuration, singleDispenseDuration, secondsPerPixel, isWell) {
+    this.name = name;
     this.transitionPoints = transitionPoints;
     this.millimetersPerPixel = millimetersPerPixel;
+    this.aspirateDuration = aspirateDuration;
+    this.singleDispenseDuration = singleDispenseDuration;
+    this.secondsPerPixel = secondsPerPixel;
     this.isWell = isWell;
 
     this.canvasPlastic = undefined;
@@ -77,8 +81,22 @@ class Vessel {
     this.canvasPlastic = new Canvas2d(this.widthPx, this.heightPx, parentId);
   }
 
-  createCanvasAction() {
+  createCanvasForAction(action, parentId) {
+    let widthPx = 0.0;
+    if (action == "aspirate") {
+      if (!this.aspirateDuration) {
+        throw new Error(`[${this.name}] aspirate duration: ${this.aspirateDuration}`);
+      }
+      widthPx = this.aspirateDuration / this.secondsPerPixel;
+    }
+    else if (action === "singleDispense") {
+      if (!this.singleDispenseDuration) {
+        throw new Error(`[${this.name}] singleDispense duration: ${this.singleDispenseDuration}`);
+      } 
+      widthPx = this.singleDispenseDuration / this.secondsPerPixel;
+    }
     // TODO: create a new canvas for Aspirate or SingleDispense
+    this.canvasesActions.push(new Canvas2d(widthPx, this.heightPx, parentId))
   }
 
   remove() {
@@ -110,6 +128,7 @@ class Vessel {
     const liquidTransitionPoints = clipDistanceFromBottom(
       outlineTransitionPoints, airHeightPixels, liqHeightPixels
     );
+
     // draw
     this.canvasPlastic.background(0, 0, 0);
     this.canvasPlastic.stroke(0, 0, 0);
@@ -120,17 +139,10 @@ class Vessel {
     this.canvasPlastic.fill(100, 100, 255);
     this.canvasPlastic.drawTransitionPoints(liquidTransitionPoints);
   }
-}
 
-
-export class WellVessel extends Vessel {
-  constructor(transitionPoints, millimetersPerPixel) {
-    super(transitionPoints, millimetersPerPixel, true);
-  }
-}
-
-export class TipVessel extends Vessel {
-  constructor(transitionPoints, millimetersPerPixel) {
-    super(transitionPoints, millimetersPerPixel, false);
+  drawActions() {
+    for (let canvas of this.canvasesActions) {
+      canvas.background(100, 200, 200);
+    }
   }
 }

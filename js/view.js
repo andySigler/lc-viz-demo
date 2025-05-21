@@ -1,7 +1,7 @@
 import { loadLiquid, loadWell, getTip} from "./sharedData.js"
 import { SimContext } from "./simulate.js"
 import { AspirateKeyFrameGenerator, SingleDispenseKeyFrameGenerator } from "./keyFrame.js"
-import { WellVessel, TipVessel } from "./vessel.js";
+import { Vessel } from "./vessel.js";
 
 
 export class ViewCfg {
@@ -32,6 +32,7 @@ export class View {
     this.cfg = cfg;
 
     this.mmPerPixel = undefined;
+    this.secondsPerPixel = undefined;
     this.parentId = undefined;
 
     this.loadedLiquid = undefined;
@@ -45,6 +46,8 @@ export class View {
     // keyframes (built using sharedData + simulation)
     this.aspirateKeyFrames = undefined;
     this.singleDispenseKeyFrames = undefined;
+    this.aspirateDuration = undefined;
+    this.singleDispenseDuration = undefined;
 
     // vessels (built using sharedData + keyFrames)
     this.srcVessel = undefined;
@@ -72,31 +75,68 @@ export class View {
     );
     this.aspirateKeyFrames = (new AspirateKeyFrameGenerator(this.simulationCtx)).generate();
     this.singleDispenseKeyFrames = (new SingleDispenseKeyFrameGenerator(this.simulationCtx)).generate();
+    this.aspirateDuration = this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1].time;
+    this.singleDispenseDuration = this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1].time;
   }
 
-  async initialize(parentId, mmPerPixel) {
+  createNewVessel(name, transPoints) {
+    let isWell = false;
+    let aspDuration = this.aspirateDuration;
+    let dispDuration = this.singleDispenseDuration;
+    if (name === this.cfg.srcName) {
+      dispDuration = 0.0;  // only show aspirate (zero dispense)
+      isWell = true;
+    }
+    else if (name === this.cfg.dstName) {
+      aspDuration = 0.0;  // only show dispense (zero aspirate)
+      isWell = true;
+    }
+    else if (name !== this.cfg.tipName) {
+      throw new Error(`unexpected vessel name: ${name}`)
+    }
+    const vessel = new Vessel(
+      name,
+      transPoints,
+      this.mmPerPixel,
+      aspDuration,
+      dispDuration,
+      this.secondsPerPixel,
+      isWell,
+    )
+
+    if (aspDuration) {
+      vessel.createCanvasForAction("aspirate", this.parentId);
+    }
+    vessel.createCanvasPlastic(this.parentId);
+    if (dispDuration) {
+      vessel.createCanvasForAction("singleDispense", this.parentId);
+    }
+
+
+    if (aspDuration) {
+      vessel.drawPlastic(this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1]);
+    }
+    else {
+      vessel.drawPlastic(this.singleDispenseKeyFrames[0]);
+    }
+    vessel.drawActions();
+    return vessel;
+  }
+
+  async initialize(parentId, mmPerPixel, secondsPerPixel) {
     if (this.parentId) {
       throw new Error("View already initialized");
     }
     this.parentId = parentId;
     this.mmPerPixel = mmPerPixel;
+    this.secondsPerPixel = secondsPerPixel;
 
     await this.loadFromSharedData();
     this.simulateAndGenerateKeyFrames();
 
-    this.srcVessel = new WellVessel(this.loadedSrc.transitionPoints, this.mmPerPixel);
-    this.tipVessel = new TipVessel(this.loadedTip.transitionPoints, this.mmPerPixel);
-    this.dstVessel = new WellVessel(this.loadedDst.transitionPoints, this.mmPerPixel);
-    this.srcVessel.createCanvasPlastic(this.parentId);
-    this.tipVessel.createCanvasPlastic(this.parentId);
-    this.dstVessel.createCanvasPlastic(this.parentId);
-
-    // initialize drawing, starting from post-aspirate
-    this.srcVessel.drawPlastic(this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1]);
-    this.tipVessel.drawPlastic(this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1]);
-    this.dstVessel.drawPlastic(this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1]);
-
-    // TODO: draw action canvases (2x for tip, 1x for each well)
+    this.srcVessel = this.createNewVessel(this.cfg.srcName, this.loadedSrc.transitionPoints);
+    this.tipVessel = this.createNewVessel(this.cfg.tipName, this.loadedTip.transitionPoints);
+    this.dstVessel = this.createNewVessel(this.cfg.dstName, this.loadedDst.transitionPoints);
   }
 
   remove() {

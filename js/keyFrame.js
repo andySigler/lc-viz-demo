@@ -86,6 +86,7 @@ class KeyFrameGenerator {
         // TODO: need to configure max push-out per pipette-type
       }
     }
+    this.keyFrames.sort((a, b) => a.time - b.time);
     return this.keyFrames;
   }
 }

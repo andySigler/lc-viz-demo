@@ -27,7 +27,7 @@ export function applyMouseControls(canvas, canvasName = 'unknown') {
     }
 
     if (inside || state.mouseInside) {
-      printState(eventName);
+      // printState(eventName);
     }
   };
 
