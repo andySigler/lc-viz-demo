@@ -84,15 +84,18 @@ export class View {
     this.singleDispenseDuration = this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1].time;
   }
 
-  createNewVessel(name, transPoints) {
+  createNewVessel(name, transPoints, showAspirate, showDispense) {
+    if (!showAspirate && !showDispense) {
+      throw new Error("must draw at least aspirate OR dispense, not neither")
+    }
     let isWell = false;
     let aspDuration = this.aspirateDuration;
     let dispDuration = this.singleDispenseDuration;
-    if (name === this.cfg.srcName) {
+    if (showAspirate && !showDispense) {
       dispDuration = 0.0;  // only show aspirate (zero dispense)
       isWell = true;
     }
-    else if (name === this.cfg.dstName) {
+    else if (showDispense && !showAspirate) {
       aspDuration = 0.0;  // only show dispense (zero aspirate)
       isWell = true;
     }
@@ -139,9 +142,9 @@ export class View {
     await this.loadFromSharedData();
     this.simulateAndGenerateKeyFrames();
 
-    this.srcVessel = this.createNewVessel(this.cfg.srcName, this.loadedSrc.transitionPoints);
-    this.tipVessel = this.createNewVessel(this.cfg.tipName, this.loadedTip.transitionPoints);
-    this.dstVessel = this.createNewVessel(this.cfg.dstName, this.loadedDst.transitionPoints);
+    this.srcVessel = this.createNewVessel(this.cfg.srcName, this.loadedSrc.transitionPoints, true, false);
+    this.tipVessel = this.createNewVessel(this.cfg.tipName, this.loadedTip.transitionPoints, true, true);
+    this.dstVessel = this.createNewVessel(this.cfg.dstName, this.loadedDst.transitionPoints, false, true);
 
     const srcPlasticCanvasWidth = this.srcVessel.canvasPlastic.width;
     const tipPlasticCanvasWidth = this.tipVessel.canvasPlastic.width;
@@ -193,6 +196,7 @@ export class View {
     this.srcVessel.setCanvasPositionPlastic(srcPlasticXY.x, srcPlasticXY.y);
     this.srcVessel.setCanvasPositionForAction("aspirate", srcAspirateXY.x, srcAspirateXY.y);
     this.dstVessel.setCanvasPositionPlastic(dstPlasticXY.x, dstPlasticXY.y);
+    console.log(this.dstVessel)
     this.dstVessel.setCanvasPositionForAction("singleDispense", dstDispenseXY.x, dstDispenseXY.y);
 
     this.updateVesselPositions();

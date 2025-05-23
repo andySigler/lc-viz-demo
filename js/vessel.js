@@ -127,6 +127,7 @@ export class Vessel {
   }
 
   setCanvasPositionForAction(action, offsetFromCenterX, offsetFromTopY) {
+    console.log(action)
     this.canvasesActions[action].setPosition(offsetFromCenterX, offsetFromTopY);
     this.canvasesActions[action].updatePosition();
   }

@@ -29,9 +29,9 @@ export const defaultView = new ViewConfig({
   liquidName: ethanol80,
   tipName: t200,
   pipetteName: p1000S,
-  srcName: well2ml,
+  srcName: well200ul,
   dstName: well200ul,
-  srcStartVolume: 1000.0,
+  srcStartVolume: 150,
   dstStartVolume: 0.0,
   colors: defaultColors
 });
