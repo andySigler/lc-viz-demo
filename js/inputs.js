@@ -1,5 +1,5 @@
 import { availableLiquids, availablePipettes, availableTips, availableLabwares } from "./sharedData.js";
-import { defaultColors } from './defaults.js';
+import { defaultColors, colorText } from './defaults.js';
 import { ViewConfig } from './view.js';
 
 
@@ -14,6 +14,23 @@ function createDropdown(options = []) {
   }
 
   return select;
+}
+
+function addLabeledInput(parent, labelText, inputElement) {
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.marginBottom = '4px';
+
+  const label = document.createElement('label');
+  label.textContent = labelText;
+  label.style.marginRight = '8px';
+  label.style.width = '200px';  // optional fixed width
+  label.style.color = colorText;
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(inputElement);
+  parent.appendChild(wrapper);
 }
 
 export function createDomUI(parentId, defaults, onNewConfig) {
@@ -48,7 +65,7 @@ export function createDomUI(parentId, defaults, onNewConfig) {
   dropdownSources.value = defaults.srcName;
   dropdownDestinations.value = defaults.dstName;
 
-  const buildNewConfig = async () => {
+  const buildNewConfig = () => {
     const newCfg = new ViewConfig({
       target: Number(inputTarget.value),
       liquidName: dropdownLiquids.value,
@@ -72,12 +89,12 @@ export function createDomUI(parentId, defaults, onNewConfig) {
   inputSrcVolume.addEventListener("change", buildNewConfig);
   inputDstVolume.addEventListener("change", buildNewConfig);
 
-  parent.appendChild(dropdownLiquids);
-  parent.appendChild(dropdownPipettes);
-  parent.appendChild(dropdownTips);
-  parent.appendChild(dropdownSources);
-  parent.appendChild(dropdownDestinations);
-  parent.appendChild(inputTarget);
-  parent.appendChild(inputSrcVolume);
-  parent.appendChild(inputDstVolume);
+  addLabeledInput(parent, "Target Volume", inputTarget);
+  addLabeledInput(parent, "Liquid", dropdownLiquids);
+  addLabeledInput(parent, "Pipette", dropdownPipettes);
+  addLabeledInput(parent, "Tip", dropdownTips);
+  addLabeledInput(parent, "Source Labware", dropdownSources);
+  addLabeledInput(parent, " - Start uL", inputSrcVolume);
+  addLabeledInput(parent, "Destination Labware", dropdownDestinations);
+  addLabeledInput(parent, " - Start uL", inputDstVolume);
 }

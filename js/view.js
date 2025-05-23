@@ -196,7 +196,6 @@ export class View {
     this.srcVessel.setCanvasPositionPlastic(srcPlasticXY.x, srcPlasticXY.y);
     this.srcVessel.setCanvasPositionForAction("aspirate", srcAspirateXY.x, srcAspirateXY.y);
     this.dstVessel.setCanvasPositionPlastic(dstPlasticXY.x, dstPlasticXY.y);
-    console.log(this.dstVessel)
     this.dstVessel.setCanvasPositionForAction("singleDispense", dstDispenseXY.x, dstDispenseXY.y);
 
     this.updateVesselPositions();
