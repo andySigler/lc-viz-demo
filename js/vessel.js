@@ -145,8 +145,10 @@ export class Vessel {
       this.canvasPlastic.remove();
     }
     this.canvasPlastic = undefined;
-    for (let c of this.canvasesActions) {
-      c.remove();
+    for (let c in this.canvasesActions) {
+      if (this.canvasesActions[c]) {
+        this.canvasesActions[c].remove();
+      }
     }
     this.canvasesActions = [];
   }
