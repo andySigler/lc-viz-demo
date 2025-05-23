@@ -1,5 +1,5 @@
 import { t50, p50S, well2ml, well360ul } from './sharedData.js';
-import { ViewCfg } from './view.js';
+import { ViewConfig } from './view.js';
 import { VesselColors } from './vessel.js';
 
 const colorWhite = "rgb(251, 250, 248)";
@@ -21,7 +21,10 @@ const colorOutline = colorBlack;
 const colorBackground = "rgba(0, 0, 0, 0)";
 
 
-export const defaultView = new ViewCfg({
+export const defaultColors = new VesselColors(colorPlastic, colorLiquid, colorFlow, colorOutline, colorBackground);
+
+
+export const defaultView = new ViewConfig({
   target: 40,
   liquidName: "water",
   tipName: t50,
@@ -30,5 +33,5 @@ export const defaultView = new ViewCfg({
   dstName: well360ul,
   srcStartVolume: 1000.0,
   dstStartVolume: 0.0,
-  colors: new VesselColors(colorPlastic, colorLiquid, colorFlow, colorOutline, colorBackground)
+  colors: defaultColors
 });

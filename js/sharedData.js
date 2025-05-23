@@ -26,6 +26,12 @@ export const reservoir15ml = "nest_12_reservoir_15ml";
 export const reservoir290ml = "nest_1_reservoir_290ml";
 
 
+export const availableLiquids = [water, glycerol50, ethanol80];
+export const availablePipettes = [p50S, p50M, p1000S, p1000M, p1000H];
+export const availableTips = [t50, t200, t1000];
+export const availableLabwares = [well112ul, well200ul, well360ul, well2ml, tube2ml, tube50ml, tube15ml, reservoir15ml, reservoir290ml];
+
+
 export class TransitionPoint {
   constructor(distanceFromBottom, width, uLFromBottom) {
     this.distanceFromBottom = distanceFromBottom;

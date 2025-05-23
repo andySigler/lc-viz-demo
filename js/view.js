@@ -5,7 +5,7 @@ import { Patterns } from "./canvas.js"
 import { Vessel } from "./vessel.js";
 
 
-export class ViewCfg {
+export class ViewConfig {
   constructor({
     target,
     liquidName,
@@ -17,14 +17,14 @@ export class ViewCfg {
     dstStartVolume,
     colors
   } = {}) {
-    this.target = target;
     this.liquidName = liquidName;
     this.tipName = tipName;
+    this.target = target;  // Number
     this.pipetteName = pipetteName;
     this.srcName = srcName;
     this.dstName = dstName;
-    this.srcStartVolume = srcStartVolume;
-    this.dstStartVolume = dstStartVolume;
+    this.srcStartVolume = srcStartVolume; // Number
+    this.dstStartVolume = dstStartVolume; // Number
     this.colors = colors;
   }
 }
