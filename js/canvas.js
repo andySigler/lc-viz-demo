@@ -205,7 +205,7 @@ export class Canvas2d {
     this.ctx.restore();
   }
 
-  drawKeyFrames(keyFrames, isWell, patterns, translateY) {
+  drawKeyFrames(keyFrames, isWell, colorLiquid, colorBlowOut, patternsLiquid, patternsBlowOut, translateY) {
     const liquidHeights = [];
     const airHeights = [];
     const blowOutHeights = [];
@@ -218,7 +218,7 @@ export class Canvas2d {
     const liquidSections = [];
     const blowOutSections = [];
     for (let i = 0; i < keyFrames.length - 1; i++) {
-      if (!blowOutHeights[i]) {
+      if (!blowOutHeights[i] && !blowOutHeights[i + 1]) {
         liquidSections.push({
           "bottomLeft": [keyFrames[i].time, airHeights[i]],
           "topLeft": [keyFrames[i].time, liquidHeights[i]],
@@ -238,12 +238,14 @@ export class Canvas2d {
 
     const actionDuration = keyFrames[keyFrames.length - 1].time;
     let prevWasDiag = false;
+    this.fill(colorLiquid);
     for (let s of liquidSections) {
-      prevWasDiag = this.drawSection(s, translateY, patterns, prevWasDiag, actionDuration);
+      prevWasDiag = this.drawSection(s, translateY, patternsLiquid, prevWasDiag, actionDuration);
     }
     prevWasDiag = false;
+    this.fill(colorBlowOut);
     for (let s of blowOutSections) {
-      prevWasDiag = this.drawSection(s, translateY, patterns, prevWasDiag, actionDuration);
+      prevWasDiag = this.drawSection(s, translateY, patternsBlowOut, prevWasDiag, actionDuration);
     }
   }
 

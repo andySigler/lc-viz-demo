@@ -3,10 +3,12 @@ import { TransitionPoint } from './sharedData.js'
 
 
 export class VesselColors {
-  constructor(plastic, liquid, flow, outline, background) {
+  constructor(plastic, liquid, flow, blowOut, blowOutFlow, outline, background) {
     this.plastic = plastic;
     this.liquid = liquid;
     this.flow = flow;
+    this.blowOut = blowOut;
+    this.blowOutFlow = blowOutFlow;
     this.outline = outline;
     this.background = background;
   }
@@ -187,7 +189,7 @@ export class Vessel {
     this.canvasPlastic.drawTransitionPoints(liquidTransitionPoints);
   }
 
-  drawAction(action, keyFrames, patterns) {
+  drawAction(action, keyFrames, patternsLiquids, patternsBlowOut) {
     const canvas = this.canvasesActions[action];
     if (!canvas) {
       throw new Error(`unexpected action: ${action}`);
@@ -199,7 +201,6 @@ export class Vessel {
     }
     canvas.background(this.colors.plastic);
     canvas.stroke(this.colors.outline);
-    canvas.fill(this.colors.liquid);
-    canvas.drawKeyFrames(keyFramesPixels, this.isWell, patterns, this.heightPxPlastic);
+    canvas.drawKeyFrames(keyFramesPixels, this.isWell, this.colors.liquid, this.colors.blowOut,patternsLiquids, patternsBlowOut, this.heightPxPlastic);
   }
 }

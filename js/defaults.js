@@ -17,12 +17,22 @@ const colorOrange = "rgb(249, 166, 32)";
 const colorPlastic = colorGrey;
 const colorLiquid = colorBlue;
 const colorFlow = colorBluePale;
+const colorBlowOut = colorOrange;
+const colorBlowOutFlow = colorYellow;
 const colorOutline = colorBlack;
 const colorBackground = "rgba(0, 0, 0, 0)";
 export const colorText = colorWhite;
 
 
-export const defaultColors = new VesselColors(colorPlastic, colorLiquid, colorFlow, colorOutline, colorBackground);
+export const defaultColors = new VesselColors(
+  colorPlastic,
+  colorLiquid,
+  colorFlow,
+  colorBlowOut,
+  colorBlowOutFlow,
+  colorOutline,
+  colorBackground
+);
 
 
 export const defaultView = new ViewConfig({

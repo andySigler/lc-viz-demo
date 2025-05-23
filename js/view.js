@@ -59,6 +59,7 @@ export class View {
     this.dstVessel = undefined;
 
     this.patterns = new Patterns(this.cfg.colors.liquid, this.cfg.colors.flow, 4, 2);
+    this.patternsBlowOut = new Patterns(this.cfg.colors.blowOut, this.cfg.colors.blowOutFlow, 4, 2);
   }
 
   async loadFromSharedData() {
@@ -81,7 +82,6 @@ export class View {
     );
     this.aspirateKeyFrames = (new AspirateKeyFrameGenerator(this.simulationCtx)).generate();
     this.singleDispenseKeyFrames = (new SingleDispenseKeyFrameGenerator(this.simulationCtx)).generate();
-    console.log(this.singleDispenseKeyFrames);
     this.aspirateDuration = this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1].time;
     this.singleDispenseDuration = this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1].time;
   }
@@ -226,7 +226,7 @@ export class View {
     // TIP
     this.tipVessel.drawAction("aspirate", this.aspirateKeyFrames, this.patterns);
     this.tipVessel.drawPlastic(this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1]);
-    this.tipVessel.drawAction("singleDispense", this.singleDispenseKeyFrames, this.patterns);
+    this.tipVessel.drawAction("singleDispense", this.singleDispenseKeyFrames, this.patterns, this.patternsBlowOut);
     // DST
     this.dstVessel.drawAction("singleDispense", this.singleDispenseKeyFrames, this.patterns);
     this.dstVessel.drawPlastic(this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1]);
