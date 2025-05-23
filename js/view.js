@@ -147,7 +147,7 @@ export class View {
     const tipPlasticCanvasWidth = this.tipVessel.canvasPlastic.width;
     const tipPlasticCanvasHeight = this.tipVessel.canvasPlastic.height;
     const tipAspirateCanvasWidth = this.tipVessel.canvasesActions["aspirate"].width;
-    const dstDispenseCanvasWidth = this.dstVessel.canvasesActions["singleDispense"].width;
+    const dstDispenseCanvasWidth = this.tipVessel.canvasesActions["singleDispense"].width;
 
     // NOTE: coordinates are:
     //          (x) offset from center, negative is to the left

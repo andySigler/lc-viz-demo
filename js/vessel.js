@@ -149,8 +149,8 @@ export class Vessel {
       if (this.canvasesActions[c]) {
         this.canvasesActions[c].remove();
       }
+      this.canvasesActions[c] = undefined;
     }
-    this.canvasesActions = [];
   }
 
   drawPlastic(keyFrame) {
