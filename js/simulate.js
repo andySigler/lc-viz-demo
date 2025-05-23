@@ -1,5 +1,10 @@
 import { getDelaySeconds, calcValueByVolume, getMixCount, getMixVolume } from './sharedData.js';
 
+
+export const maxBlowOutP50 = 12;
+export const maxBlowOutP1000 = 80;
+
+
 class SimWell {
   constructor(well, liquidVolume) {
     this.totalLiquidVolume = well.totalLiquidVolume;
@@ -64,11 +69,28 @@ export class SimContext {
   dispense(ul, well, pushOut) {
     well.currentVolume += ul;
     this.tip.currentVolume -= ul;
+    if (pushOut && this.tip.currentVolume > 0) {
+      throw new Error(
+        `tip must be empty when dispensing with pushOut,
+         but would hold ${this.tip.currentVolume} uL`
+      );
+    }
     this.tip.currentBlowOut = pushOut;
+    if (this.pipetteName.includes("50") && this.tip.currentBlowOut > maxBlowOutP50) {
+      throw new Error(`${this.pipetteName} cannot exceed ${maxBlowOutP50} ul of push-out`);
+    }
+    else if (this.tip.currentBlowOut > maxBlowOutP1000) {
+      throw new Error(`${this.pipetteName} cannot exceed ${maxBlowOutP1000} ul of push-out`);
+    }
   }
 
   blowOut() {
-    // TODO: need to configure max push-out per pipette-type
+    if (this.pipetteName.includes("50")) {
+      this.tip.currentBlowOut = maxBlowOutP50;
+    }
+    else {
+      this.tip.currentBlowOut = maxBlowOutP1000;
+    }
   }
 
 }

@@ -26,7 +26,7 @@ export const defaultColors = new VesselColors(colorPlastic, colorLiquid, colorFl
 
 
 export const defaultView = new ViewConfig({
-  target: 1000,
+  target: 900,
   liquidName: glycerol50,
   tipName: t1000,
   pipetteName: p1000H,

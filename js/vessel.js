@@ -59,7 +59,7 @@ function clipDistanceFromBottom(transitionPoints, min, max) {
 
 
 export class Vessel {
-  constructor(name, transitionPoints, millimetersPerPixel, aspirateDuration, singleDispenseDuration, secondsPerPixel, isWell, colors) {
+  constructor(name, transitionPoints, millimetersPerPixel, aspirateDuration, singleDispenseDuration, secondsPerPixel, isWell, blowOutMm, colors) {
     this.name = name;
     this.transitionPoints = transitionPoints;
     this.millimetersPerPixel = millimetersPerPixel;
@@ -67,6 +67,7 @@ export class Vessel {
     this.singleDispenseDuration = singleDispenseDuration;
     this.secondsPerPixel = secondsPerPixel;
     this.isWell = isWell;
+    this.blowOutMm = blowOutMm;
 
     this.colors = colors;
 
@@ -77,12 +78,20 @@ export class Vessel {
     };
   }
 
-  get heightMm() {
+  get heightMmPlastic() {
     return this.transitionPoints[this.transitionPoints.length - 1].distanceFromBottom;
   }
 
-  get heightPx() {
-    return this.heightMm / this.millimetersPerPixel;
+  get heightMmPlasticAndAir() {
+    return this.heightMmPlastic + this.blowOutMm;
+  }
+
+  get heightPxPlastic() {
+    return this.heightMmPlastic / this.millimetersPerPixel;
+  }
+
+  get heightPxPlasticAndAir() {
+    return this.heightMmPlasticAndAir / this.millimetersPerPixel;
   }
 
   get widthMmPlastic() {
@@ -111,13 +120,13 @@ export class Vessel {
 
   createCanvasPlastic(parentId) {
     const w = this.widthPxPlastic;
-    const h = this.heightPx;
+    const h = this.heightPxPlastic;
     this.canvasPlastic = new Canvas2d(w, h, parentId);
   }
 
   createCanvasForAction(action, parentId) {
     const w = this.getWidthPxAction(action);
-    const h = this.heightPx;
+    const h = this.heightPxPlasticAndAir;
     this.canvasesActions[action] = new Canvas2d(w, h, parentId);
   }
 
@@ -191,6 +200,6 @@ export class Vessel {
     canvas.background(this.colors.plastic);
     canvas.stroke(this.colors.outline);
     canvas.fill(this.colors.liquid);
-    canvas.drawKeyFrames(keyFramesPixels, this.isWell, patterns);
+    canvas.drawKeyFrames(keyFramesPixels, this.isWell, patterns, this.heightPxPlastic);
   }
 }

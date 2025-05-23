@@ -3,6 +3,7 @@ import { SimContext } from "./simulate.js"
 import { AspirateKeyFrameGenerator, SingleDispenseKeyFrameGenerator } from "./keyFrame.js"
 import { Patterns } from "./canvas.js"
 import { Vessel } from "./vessel.js";
+import { maxBlowOutP50, maxBlowOutP1000 } from "./simulate.js";
 
 
 export class ViewConfig {
@@ -84,9 +85,12 @@ export class View {
     this.singleDispenseDuration = this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1].time;
   }
 
-  createNewVessel(name, transPoints, showAspirate, showDispense) {
+  createNewVessel(name, transPoints, showAspirate, showDispense, blowOutMm) {
     if (!showAspirate && !showDispense) {
       throw new Error("must draw at least aspirate OR dispense, not neither")
+    }
+    if (!showDispense && blowOutMm) {
+      throw new Error("must draw the dispense when including blowOutMm");
     }
     let isWell = false;
     let aspDuration = this.aspirateDuration;
@@ -110,6 +114,7 @@ export class View {
       dispDuration,
       this.secondsPerPixel,
       isWell,
+      blowOutMm,
       this.cfg.colors,
     )
 
@@ -142,13 +147,19 @@ export class View {
     await this.loadFromSharedData();
     this.simulateAndGenerateKeyFrames();
 
-    this.srcVessel = this.createNewVessel(this.cfg.srcName, this.loadedSrc.transitionPoints, true, false);
-    this.tipVessel = this.createNewVessel(this.cfg.tipName, this.loadedTip.transitionPoints, true, true);
-    this.dstVessel = this.createNewVessel(this.cfg.dstName, this.loadedDst.transitionPoints, false, true);
+    let maxBlowOut = maxBlowOutP1000;
+    if (this.simulationCtx.pipetteName.includes("50")) {
+      maxBlowOut = maxBlowOutP50;
+    }
+    const blowOutGraphMm = (maxBlowOut / this.loadedTip.totalLiquidVolume) * this.loadedTip.length;
+
+    this.srcVessel = this.createNewVessel(this.cfg.srcName, this.loadedSrc.transitionPoints, true, false, 0.0);
+    this.tipVessel = this.createNewVessel(this.cfg.tipName, this.loadedTip.transitionPoints, true, true, blowOutGraphMm);
+    this.dstVessel = this.createNewVessel(this.cfg.dstName, this.loadedDst.transitionPoints, false, true, 0.0);
 
     const srcPlasticCanvasWidth = this.srcVessel.canvasPlastic.width;
     const tipPlasticCanvasWidth = this.tipVessel.canvasPlastic.width;
-    const tipPlasticCanvasHeight = this.tipVessel.canvasPlastic.height;
+    const tipPlasticCanvasHeightWithBlowOut = this.tipVessel.canvasesActions["aspirate"].height;
     const tipAspirateCanvasWidth = this.tipVessel.canvasesActions["aspirate"].width;
     const dstDispenseCanvasWidth = this.tipVessel.canvasesActions["singleDispense"].width;
 
@@ -173,12 +184,12 @@ export class View {
     // ASPIRATE inside the WELL
     const srcAspirateXY = {
       "x": tipAspirateXY.x,
-      "y": tipAspirateXY.y + padding + tipPlasticCanvasHeight
+      "y": tipAspirateXY.y + padding + tipPlasticCanvasHeightWithBlowOut
     };
     // DISPENSE inside the WELL
     const dstDispenseXY = {
       "x": tipDispenseXY.x,
-      "y": tipDispenseXY.y + padding + tipPlasticCanvasHeight
+      "y": tipDispenseXY.y + padding + tipPlasticCanvasHeightWithBlowOut
     };
     // WELLS
     const srcPlasticXY = {

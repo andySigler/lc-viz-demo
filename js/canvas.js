@@ -205,12 +205,14 @@ export class Canvas2d {
     this.ctx.restore();
   }
 
-  drawKeyFrames(keyFrames, isWell, patterns) {
+  drawKeyFrames(keyFrames, isWell, patterns, translateY) {
     const liquidHeights = [];
     const airHeights = [];
+    const blowOutHeights = [];
     for (let kf of keyFrames) {
-      liquidHeights.push(kf.liquidHeight(isWell))
-      airHeights.push(kf.airHeight(isWell))
+      liquidHeights.push(kf.liquidHeight(isWell));
+      airHeights.push(kf.airHeight(isWell));
+      blowOutHeights.push(kf.blowOutHeight(isWell));
     }
 
     const liquidSections = [];
@@ -226,7 +228,7 @@ export class Canvas2d {
     let prevWasDiag = false;
     for (let s of liquidSections) {
       this.ctx.save();
-      this.ctx.translate(0, this.canvas.height);
+      this.ctx.translate(0, translateY);
       this.ctx.beginPath();
       this.ctx.moveTo(s.bottomLeft[0], -s.bottomLeft[1]);
       this.ctx.lineTo(s.topLeft[0], -s.topLeft[1]);

@@ -2,11 +2,12 @@ import { AspirateSubmerge, AspirateLiquid, AspirateRetract } from './simulate.js
 import { SingleDispenseSubmerge, SingleDispenseLiquid, SingleDispenseRetract } from './simulate.js';
 
 class KeyFrame {
-  constructor(time, tipZ, liquidInTipHeight, airInTipHeight, liquidInWellHeight) {
+  constructor(time, tipZ, liquidInTipHeight, airInTipHeight, blowOutInTipHeight, liquidInWellHeight) {
     this.time = time;
     this.tipZ = tipZ;
     this.liquidInTipHeight = liquidInTipHeight;
     this.airInTipHeight = airInTipHeight;
+    this.blowOutInTipHeight = blowOutInTipHeight;
     this.liquidInWellHeight = liquidInWellHeight;
   }
 
@@ -16,6 +17,7 @@ class KeyFrame {
       this.tipZ / mmPerPixel,
       this.liquidInTipHeight / mmPerPixel,
       this.airInTipHeight / mmPerPixel,
+      this.blowOutInTipHeight / mmPerPixel,
       this.liquidInWellHeight / mmPerPixel,
     )
   }
@@ -32,6 +34,13 @@ class KeyFrame {
       return 0.0;
     }
     return this.airInTipHeight;
+  }
+
+  blowOutHeight(isWell) {
+    if (isWell) {
+      return 0.0;
+    }
+    return this.blowOutInTipHeight;
   }
 }
 
@@ -60,6 +69,7 @@ class KeyFrameGenerator {
       tipZ,
       this.ctx.tip.getCurrentLiquidHeight(),
       this.ctx.tip.getCurrentAirHeight(),
+      this.ctx.tip.getCurrentBlowOutHeight(),
       wellLiqHeight
     )
     this.keyFrames.push(newKeyFrame)
