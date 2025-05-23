@@ -1,4 +1,4 @@
-import { t50, p50S, well2ml, well360ul } from './sharedData.js';
+import { t200, p1000S, well2ml, well200ul, ethanol80 } from './sharedData.js';
 import { ViewConfig } from './view.js';
 import { VesselColors } from './vessel.js';
 
@@ -25,12 +25,12 @@ export const defaultColors = new VesselColors(colorPlastic, colorLiquid, colorFl
 
 
 export const defaultView = new ViewConfig({
-  target: 30,
-  liquidName: "ethanol_80",
-  tipName: t50,
-  pipetteName: p50S,
+  target: 150,
+  liquidName: ethanol80,
+  tipName: t200,
+  pipetteName: p1000S,
   srcName: well2ml,
-  dstName: well360ul,
+  dstName: well200ul,
   srcStartVolume: 1000.0,
   dstStartVolume: 0.0,
   colors: defaultColors

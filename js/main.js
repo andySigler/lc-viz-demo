@@ -21,7 +21,7 @@ const changeView = async (cfg) => {
 
 
 const main = async () => {
-  createDomUI("inputs", defaultView);
+  createDomUI("inputs", defaultView, changeView);
   await changeView(defaultView);
 }
 

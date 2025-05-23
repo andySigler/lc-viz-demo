@@ -189,7 +189,7 @@ export class SingleDispenseLiquid extends LiquidAction {
     let delay = getDelaySeconds(dispProps.delay);
     let mixCount = getMixCount(dispProps.mix);
     let mixVolume = getMixVolume(dispProps.mix);
-    super(tipStart, tipEnd, flowRate, mixCount, mixVolume);
+    super(tipStart, tipEnd, flowRate, delay, mixCount, mixVolume);
     this.pushOut = calcValueByVolume(dispProps.pushOutByVolume, simContext.target);
   }
 }

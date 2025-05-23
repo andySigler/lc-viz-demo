@@ -70,17 +70,14 @@ class KeyFrameGenerator {
 
   generateKeyFrames() {
     this.add(0.0, this.submerge.tipStart);
-    if (this.isAspirate === false) {
-      //
-    }
-    else {
+    if (!this.isAspirate) {
       this.ctx.airGapRemove();
       this.add(1.0, this.submerge.tipStart);
     }
     this.add(this.submerge.duration(this.ctx), this.submerge.tipEnd);
     this.add(this.submerge.delay, this.submerge.tipEnd);
 
-    if (this.isAspirate === true) {
+    if (this.isAspirate) {
       this.ctx.aspirate(this.ctx.target, this.ctx.srcWell);
     }
     else {

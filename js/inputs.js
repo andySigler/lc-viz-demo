@@ -16,7 +16,7 @@ function createDropdown(options = []) {
   return select;
 }
 
-export function createDomUI(parentId, defaults) {
+export function createDomUI(parentId, defaults, onNewConfig) {
   const parent = document.getElementById(parentId);
   if (!parent) {
     throw new Error(`Parent element with id "${parentId}" not found.`);
@@ -50,17 +50,17 @@ export function createDomUI(parentId, defaults) {
 
   const buildNewConfig = async () => {
     const newCfg = new ViewConfig({
-      target: inputTarget.value,
+      target: Number(inputTarget.value),
       liquidName: dropdownLiquids.value,
       tipName: dropdownTips.value,
       pipetteName: dropdownPipettes.value,
       srcName: dropdownSources.value,
       dstName: dropdownDestinations.value,
-      srcStartVolume: inputSrcVolume.value,
-      dstStartVolume: inputDstVolume.value,
+      srcStartVolume: Number(inputSrcVolume.value),
+      dstStartVolume: Number(inputDstVolume.value),
       colors: defaultColors
     });
-    await changeView(newCfg);
+    onNewConfig(newCfg);
   }
 
   dropdownLiquids.addEventListener("change", buildNewConfig);
