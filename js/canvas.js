@@ -216,50 +216,71 @@ export class Canvas2d {
     }
 
     const liquidSections = [];
+    const blowOutSections = [];
     for (let i = 0; i < keyFrames.length - 1; i++) {
-      liquidSections.push({
-        "bottomLeft": [keyFrames[i].time, airHeights[i]],
-        "topLeft": [keyFrames[i].time, liquidHeights[i]],
-        "topRight": [keyFrames[i + 1].time, liquidHeights[i + 1]],
-        "bottomRight": [keyFrames[i + 1].time, airHeights[i + 1]],
-      })
-    }
-
-    let prevWasDiag = false;
-    for (let s of liquidSections) {
-      this.ctx.save();
-      this.ctx.translate(0, translateY);
-      this.ctx.beginPath();
-      this.ctx.moveTo(s.bottomLeft[0], -s.bottomLeft[1]);
-      this.ctx.lineTo(s.topLeft[0], -s.topLeft[1]);
-      this.ctx.lineTo(s.topRight[0], -s.topRight[1]);
-      this.ctx.lineTo(s.bottomRight[0], -s.bottomRight[1]);
-      this.ctx.closePath();
-      
-      const sWidth = s.topRight[0] - s.topLeft[0];
-      const diagPatternWidth = 8;
-      if (s.topLeft[1] < s.topRight[1]) {
-        this.ctx.fillStyle = patterns.diagUp;
-        prevWasDiag = true;
-        this.ctx.translate(sWidth - diagPatternWidth, 0);
-      }
-      else if (s.topLeft[1] > s.topRight[1]) {
-        this.ctx.fillStyle = patterns.diagDown;
-        prevWasDiag = true;
-        this.ctx.translate(sWidth - diagPatternWidth, 0);
-      }
-      else if (prevWasDiag && s.bottomRight[0] != keyFrames[keyFrames.length - 1].time) {
-        this.ctx.fillStyle = patterns.horizontal;
-        prevWasDiag = false;
+      if (!blowOutHeights[i]) {
+        liquidSections.push({
+          "bottomLeft": [keyFrames[i].time, airHeights[i]],
+          "topLeft": [keyFrames[i].time, liquidHeights[i]],
+          "topRight": [keyFrames[i + 1].time, liquidHeights[i + 1]],
+          "bottomRight": [keyFrames[i + 1].time, airHeights[i + 1]],
+        });
       }
       else {
-        this.ctx.fillStyle = patterns.defaultColor;
-        prevWasDiag = false;
+        blowOutSections.push({
+          "bottomLeft": [keyFrames[i].time, -blowOutHeights[i]],
+          "topLeft": [keyFrames[i].time, 0.0],
+          "topRight": [keyFrames[i + 1].time, 0.0],
+          "bottomRight": [keyFrames[i + 1].time, -blowOutHeights[i + 1]],
+        })
       }
-
-      this.ctx.fill();
-      this.ctx.stroke();
-      this.ctx.restore();
     }
+
+    const actionDuration = keyFrames[keyFrames.length - 1].time;
+    let prevWasDiag = false;
+    for (let s of liquidSections) {
+      prevWasDiag = this.drawSection(s, translateY, patterns, prevWasDiag, actionDuration);
+    }
+    prevWasDiag = false;
+    for (let s of blowOutSections) {
+      prevWasDiag = this.drawSection(s, translateY, patterns, prevWasDiag, actionDuration);
+    }
+  }
+
+  drawSection(s, translateY, patterns, prevWasDiag, actionDuration) {
+    this.ctx.save();
+    this.ctx.translate(0, translateY);
+    this.ctx.beginPath();
+    this.ctx.moveTo(s.bottomLeft[0], -s.bottomLeft[1]);
+    this.ctx.lineTo(s.topLeft[0], -s.topLeft[1]);
+    this.ctx.lineTo(s.topRight[0], -s.topRight[1]);
+    this.ctx.lineTo(s.bottomRight[0], -s.bottomRight[1]);
+    this.ctx.closePath();
+    const sWidth = s.topRight[0] - s.topLeft[0];
+    const diagPatternWidth = 8;
+    if (s.topLeft[1] < s.topRight[1]) {
+      this.ctx.fillStyle = patterns.diagUp;
+      prevWasDiag = true;
+      this.ctx.translate(sWidth - diagPatternWidth, 0);
+    }
+    else if (s.topLeft[1] > s.topRight[1]) {
+      this.ctx.fillStyle = patterns.diagDown;
+      prevWasDiag = true;
+      this.ctx.translate(sWidth - diagPatternWidth, 0);
+    }
+    else if (prevWasDiag && s.bottomRight[0] != actionDuration) {
+      this.ctx.fillStyle = patterns.horizontal;
+      prevWasDiag = false;
+    }
+    else {
+      this.ctx.fillStyle = patterns.defaultColor;
+      prevWasDiag = false;
+    }
+
+    this.ctx.fill();
+    this.ctx.stroke();
+    this.ctx.restore();
+
+    return prevWasDiag;
   }
 }
