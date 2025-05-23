@@ -81,6 +81,7 @@ export class View {
     );
     this.aspirateKeyFrames = (new AspirateKeyFrameGenerator(this.simulationCtx)).generate();
     this.singleDispenseKeyFrames = (new SingleDispenseKeyFrameGenerator(this.simulationCtx)).generate();
+    console.log(this.singleDispenseKeyFrames);
     this.aspirateDuration = this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1].time;
     this.singleDispenseDuration = this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1].time;
   }

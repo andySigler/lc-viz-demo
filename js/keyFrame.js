@@ -86,12 +86,19 @@ class KeyFrameGenerator {
 
     if (this.isAspirate) {
       this.ctx.aspirate(this.ctx.target, this.ctx.srcWell);
+      this.add(this.liquid.duration(this.ctx), this.liquid.tipEnd);
+      this.add(this.liquid.delay, this.liquid.tipEnd);
     }
     else {
-      this.ctx.dispense(this.ctx.target, this.ctx.dstWell, this.liquid.pushOut);
+      this.ctx.dispense(this.ctx.target, this.ctx.dstWell);
+      const dur = this.liquid.duration(this.ctx);
+      const dispDur = dur * (this.ctx.target / (this.ctx.target + this.liquid.pushOut));
+      this.add(dispDur, this.liquid.tipEnd);
+      this.ctx.blowOut(this.liquid.pushOut);
+      this.add(dur - dispDur, this.liquid.tipEnd);
+      this.add(this.liquid.delay, this.liquid.tipEnd);
     }
-    this.add(this.liquid.duration(this.ctx), this.liquid.tipEnd);
-    this.add(this.liquid.delay, this.liquid.tipEnd);
+    
     this.add(this.retract.duration(this.ctx), this.retract.tipEnd);
     this.add(this.retract.delay, this.retract.tipEnd);
 

@@ -66,30 +66,28 @@ export class SimContext {
     this.tip.currentAir = 0.0;
   }
 
-  dispense(ul, well, pushOut) {
+  dispense(ul, well) {
     well.currentVolume += ul;
     this.tip.currentVolume -= ul;
-    if (pushOut && this.tip.currentVolume > 0) {
-      throw new Error(
-        `tip must be empty when dispensing with pushOut,
-         but would hold ${this.tip.currentVolume} uL`
-      );
-    }
-    this.tip.currentBlowOut = pushOut;
-    if (this.pipetteName.includes("50") && this.tip.currentBlowOut > maxBlowOutP50) {
-      throw new Error(`${this.pipetteName} cannot exceed ${maxBlowOutP50} ul of push-out`);
-    }
-    else if (this.tip.currentBlowOut > maxBlowOutP1000) {
-      throw new Error(`${this.pipetteName} cannot exceed ${maxBlowOutP1000} ul of push-out`);
-    }
   }
 
-  blowOut() {
-    if (this.pipetteName.includes("50")) {
-      this.tip.currentBlowOut = maxBlowOutP50;
+  blowOut(ul) {
+    if (ul === undefined) {
+      if (this.pipetteName.includes("50")) {
+        this.tip.currentBlowOut = maxBlowOutP50;
+      }
+      else {
+        this.tip.currentBlowOut = maxBlowOutP1000;
+      }
     }
     else {
-      this.tip.currentBlowOut = maxBlowOutP1000;
+      this.tip.currentBlowOut = ul;
+      if (this.pipetteName.includes("50") && this.tip.currentBlowOut > maxBlowOutP50) {
+        throw new Error(`${this.pipetteName} cannot exceed ${maxBlowOutP50} ul of push-out`);
+      }
+      else if (this.tip.currentBlowOut > maxBlowOutP1000) {
+        throw new Error(`${this.pipetteName} cannot exceed ${maxBlowOutP1000} ul of push-out`);
+      }
     }
   }
 
