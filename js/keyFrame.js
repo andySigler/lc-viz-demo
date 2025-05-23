@@ -47,9 +47,6 @@ class KeyFrameGenerator {
   }
 
   add(duration, tipZ) {
-    if (duration === 0.0 && this.keyFrames.length > 0) {
-      return;
-    }
     this.time += duration;
     let wellLiqHeight = 0.0;
     if (this.isAspirate) {
@@ -58,7 +55,7 @@ class KeyFrameGenerator {
     else {
       wellLiqHeight = this.ctx.dstWell.getCurrentLiquidHeight();
     }
-    let newKeyFrame = new KeyFrame(
+    const newKeyFrame = new KeyFrame(
       this.time,
       tipZ,
       this.ctx.tip.getCurrentLiquidHeight(),
@@ -87,6 +84,7 @@ class KeyFrameGenerator {
     this.add(this.liquid.delay, this.liquid.tipEnd);
     this.add(this.retract.duration(this.ctx), this.retract.tipEnd);
     this.add(this.retract.delay, this.retract.tipEnd);
+
     if (this.isAspirate === true) {
       this.ctx.airGapAdd(this.retract.airGap);
       this.add(1.0, this.retract.tipEnd);

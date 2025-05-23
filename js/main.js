@@ -4,7 +4,7 @@ import { createDomUI } from './inputs.js';
 
 
 const mmPerPixel = 0.3;
-const secondsPerPixel = 0.01;
+const secondsPerPixel = 0.04;
 
 let view = undefined;
 

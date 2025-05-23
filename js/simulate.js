@@ -88,7 +88,7 @@ class TipAction extends Action {
     this.speed = speed;
   }
   duration(simContext) {
-    return (this.tipStart - this.tipEnd) / this.speed;
+    return Math.abs(this.tipStart - this.tipEnd) / this.speed;
   }
 }
 
