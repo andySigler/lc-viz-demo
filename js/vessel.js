@@ -90,7 +90,7 @@ export class Vessel {
   }
 
   get widthPxPlastic() {
-    return this.widthMm / this.millimetersPerPixel;
+    return this.widthMmPlastic / this.millimetersPerPixel;
   }
 
   getWidthPxAction(action) {
@@ -110,7 +110,7 @@ export class Vessel {
   }
 
   createCanvasPlastic(parentId) {
-    const w = this.widthPx;
+    const w = this.widthPxPlastic;
     const h = this.heightPx;
     this.canvasPlastic = new Canvas2d(w, h, parentId);
   }

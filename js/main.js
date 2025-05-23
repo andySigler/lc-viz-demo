@@ -3,7 +3,7 @@ import { View } from './view.js';
 
 
 const parentNodeId = "container";
-const mmPerPixel = 0.15;
+const mmPerPixel = 0.3;
 const secondsPerPixel = 0.01;
 
 

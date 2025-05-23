@@ -53,7 +53,7 @@ export class Patterns {
 
 
 export class Canvas2d {
-  constructor(width, height, parentId, offsetFromCenterX = 0, offsetFromTopY = 0) {
+  constructor(width, height, parentId) {
     this.width = Math.floor(width);
     this.height = Math.floor(height);
     const { canvas, state, removeEventHandlers } =
@@ -95,7 +95,7 @@ export class Canvas2d {
 
   updatePosition() {
     const parentRect = this.canvas.parentNode.getBoundingClientRect();
-    const x = (parentRect.width / 2) + this.offsetFromCenterX - (this.width / 2);
+    const x = (parentRect.width / 2) + this.offsetFromCenterX;
     const y = this.offsetFromTopY;
     this.canvas.style.position = 'absolute';
     this.canvas.style.left = `${x}px`;

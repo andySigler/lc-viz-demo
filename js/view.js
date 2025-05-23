@@ -144,10 +144,10 @@ export class View {
     this.dstVessel = this.createNewVessel(this.cfg.dstName, this.loadedDst.transitionPoints);
 
     const srcPlasticCanvasWidth = this.srcVessel.canvasPlastic.width;
-    const dstPlasticCanvasWidth = this.dstVessel.canvasPlastic.width;
     const tipPlasticCanvasWidth = this.tipVessel.canvasPlastic.width;
     const tipPlasticCanvasHeight = this.tipVessel.canvasPlastic.height;
     const tipAspirateCanvasWidth = this.tipVessel.canvasesActions["aspirate"].width;
+    const dstDispenseCanvasWidth = this.dstVessel.canvasesActions["singleDispense"].width;
 
     // NOTE: coordinates are:
     //          (x) offset from center, negative is to the left
@@ -183,7 +183,7 @@ export class View {
       "y": srcAspirateXY.y
     };
     const dstPlasticXY = {
-      "x": dstDispenseXY.x + padding + dstPlasticCanvasWidth,
+      "x": dstDispenseXY.x + dstDispenseCanvasWidth + padding,
       "y": dstDispenseXY.y
     };
     
