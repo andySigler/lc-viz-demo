@@ -2,9 +2,9 @@ import { applyMouseControls } from './mouse.js';
 
 
 export class Patterns {
-  constructor(color, bgColor, gap, lineWidth) {
-    this.defaultColor = color;
-    this.backgroundColor = bgColor;
+  constructor(colorFlow, colorLiquid, gap, lineWidth) {
+    this.colorFlow = colorFlow;
+    this.colorLiquid = colorLiquid;
     this.diagDown = this.createStripePattern('diagonal-down', gap * 0.66, 1);
     this.horizontal = this.createStripePattern('horizontal', gap, lineWidth * 0.7);
     this.diagUp = this.createStripePattern('diagonal-up', gap * 0.66, 1);
@@ -24,14 +24,14 @@ export class Patterns {
     const ctx = patternCanvas.getContext('2d');
 
     // Fill background
-    ctx.fillStyle = this.backgroundColor;
+    ctx.fillStyle = this.colorLiquid;
     ctx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
 
-    ctx.strokeStyle = this.defaultColor;
+    ctx.strokeStyle = this.colorFlow;
     ctx.lineWidth = stripeWidth;
 
     if (orientation === 'horizontal') {
-      ctx.fillStyle = this.defaultColor;
+      ctx.fillStyle = this.colorFlow;
       ctx.fillRect(0, 0, 1, stripeWidth);
     } else if (orientation === 'diagonal-down') {
       ctx.beginPath();
@@ -53,10 +53,11 @@ export class Patterns {
 
 
 export class Canvas2d {
-  constructor(width, height, parentId) {
+  constructor(width, height, parentId, offsetFromCenterX = 0, offsetFromTopY = 0) {
     this.width = Math.floor(width);
     this.height = Math.floor(height);
-    const { canvas, state, removeEventHandlers } = Canvas2d.createCanvas(this.width, this.height, parentId);
+    const { canvas, state, removeEventHandlers } =
+      Canvas2d.createCanvas(this.width, this.height, parentId, offsetFromCenterX, offsetFromTopY);
     this.canvas = canvas;
     this.state = state;
     this.removeEventListeners = removeEventHandlers;
@@ -64,6 +65,10 @@ export class Canvas2d {
     this.ctx = this.canvas.getContext('2d');
     this.doFill = true;
     this.doStroke = true;
+
+    this.offsetFromCenterX = offsetFromCenterX;
+    this.offsetFromTopY = offsetFromTopY;
+    this.updatePosition();
   }
 
   remove() {
@@ -86,12 +91,24 @@ export class Canvas2d {
     if (!parent) {
       throw new Error(`Parent element with id "${parentId}" not found.`);
     }
+
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
+
     const { state, removeEventHandlers } = applyMouseControls(canvas);
     parent.appendChild(canvas);
+
     return { canvas, state, removeEventHandlers };
+  }
+
+  updatePosition() {
+    const parentRect = this.canvas.parentNode.getBoundingClientRect();
+    const x = (parentRect.width / 2) + this.offsetFromCenterX - (this.width / 2);
+    const y = this.offsetFromTopY;
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.left = `${x}px`;
+    this.canvas.style.top = `${y}px`;
   }
 
   translate(x, y) {
@@ -103,12 +120,22 @@ export class Canvas2d {
   }
 
   stroke(r, g, b) {
-    this.ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+    if (g === undefined || b == undefined) {
+      this.ctx.strokeStyle = r;
+    }
+    else {
+      this.ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
+    }
     this.doStroke = true;
   }
 
   fill(r, g, b) {
-    this.ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    if (g === undefined || b == undefined) {
+      this.ctx.fillStyle = r;
+    }
+    else {
+      this.ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    }
     this.doFill = true;
   }
 

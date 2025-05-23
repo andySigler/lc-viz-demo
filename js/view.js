@@ -14,7 +14,8 @@ export class ViewCfg {
     srcName,
     dstName,
     srcStartVolume,
-    dstStartVolume
+    dstStartVolume,
+    colors
   } = {}) {
     this.target = target;
     this.liquidName = liquidName;
@@ -24,6 +25,7 @@ export class ViewCfg {
     this.dstName = dstName;
     this.srcStartVolume = srcStartVolume;
     this.dstStartVolume = dstStartVolume;
+    this.colors = colors;
   }
 }
 
@@ -55,7 +57,7 @@ export class View {
     this.tipVessel = undefined;
     this.dstVessel = undefined;
 
-    this.patterns = new Patterns('rgb(0, 108, 250)', 'rgb(255, 255, 255)', 8, 1);
+    this.patterns = new Patterns(this.cfg.colors.liquid, this.cfg.colors.flow, 4, 2);
   }
 
   async loadFromSharedData() {
@@ -105,6 +107,7 @@ export class View {
       dispDuration,
       this.secondsPerPixel,
       isWell,
+      this.cfg.colors,
     )
 
 

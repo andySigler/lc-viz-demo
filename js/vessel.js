@@ -2,6 +2,17 @@ import { Canvas2d } from './canvas.js';
 import { TransitionPoint } from './sharedData.js'
 
 
+export class VesselColors {
+  constructor(plastic, liquid, flow, outline, background) {
+    this.plastic = plastic;
+    this.liquid = liquid;
+    this.flow = flow;
+    this.outline = outline;
+    this.background = background;
+  }
+}
+
+
 function clipDistanceFromBottom(transitionPoints, min, max) {
   const result = [];
 
@@ -48,7 +59,7 @@ function clipDistanceFromBottom(transitionPoints, min, max) {
 
 
 export class Vessel {
-  constructor(name, transitionPoints, millimetersPerPixel, aspirateDuration, singleDispenseDuration, secondsPerPixel, isWell) {
+  constructor(name, transitionPoints, millimetersPerPixel, aspirateDuration, singleDispenseDuration, secondsPerPixel, isWell, colors) {
     this.name = name;
     this.transitionPoints = transitionPoints;
     this.millimetersPerPixel = millimetersPerPixel;
@@ -56,6 +67,8 @@ export class Vessel {
     this.singleDispenseDuration = singleDispenseDuration;
     this.secondsPerPixel = secondsPerPixel;
     this.isWell = isWell;
+
+    this.colors = colors;
 
     this.canvasPlastic = undefined;
     this.canvasesActions = {
@@ -80,11 +93,11 @@ export class Vessel {
     return this.heightMm / this.millimetersPerPixel;
   }
 
-  createCanvasPlastic(parentId) {
-    this.canvasPlastic = new Canvas2d(this.widthPx, this.heightPx, parentId);
+  createCanvasPlastic(parentId, offsetX, offsetY) {
+    this.canvasPlastic = new Canvas2d(this.widthPx, this.heightPx, parentId, offsetX, offsetY);
   }
 
-  createCanvasForAction(action, parentId) {
+  createCanvasForAction(action, parentId, offsetX, offsetY) {
     let widthPx = 0.0;
     if (action == "aspirate") {
       if (!this.aspirateDuration) {
@@ -101,7 +114,7 @@ export class Vessel {
     else {
       throw new Error(`unexpected action: ${action}`);
     }
-    this.canvasesActions[action] = new Canvas2d(widthPx, this.heightPx, parentId);
+    this.canvasesActions[action] = new Canvas2d(widthPx, this.heightPx, parentId, offsetX, offsetY);
   }
 
   remove() {
@@ -131,13 +144,12 @@ export class Vessel {
     );
 
     // draw
-    this.canvasPlastic.background(0, 0, 0);
-    this.canvasPlastic.stroke(0, 0, 0);
+    this.canvasPlastic.background(this.colors.background);
+    this.canvasPlastic.stroke(this.colors.outline);
     this.canvasPlastic.strokeWidth(1);
-    this.canvasPlastic.fill(255, 255, 255);
+    this.canvasPlastic.fill(this.colors.plastic);
     this.canvasPlastic.drawTransitionPoints(outlineTransitionPoints);
-    this.canvasPlastic.noStroke();
-    this.canvasPlastic.fill(0, 108, 250);
+    this.canvasPlastic.fill(this.colors.liquid);
     this.canvasPlastic.drawTransitionPoints(liquidTransitionPoints);
   }
 
@@ -151,9 +163,9 @@ export class Vessel {
       const kfPix = frame.asPixels(this.millimetersPerPixel, this.secondsPerPixel);
       keyFramesPixels.push(kfPix);
     }
-    canvas.background(255, 255, 255);
-    canvas.stroke(0, 0, 0);
-    canvas.fill(100, 100, 255);
+    canvas.background(this.colors.plastic);
+    canvas.stroke(this.colors.outline);
+    canvas.fill(this.colors.liquid);
     canvas.drawKeyFrames(keyFramesPixels, this.isWell, patterns);
   }
 }
