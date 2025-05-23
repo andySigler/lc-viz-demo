@@ -77,51 +77,74 @@ export class Vessel {
     };
   }
 
-  get widthMm() {
-    return this.transitionPoints[this.transitionPoints.length - 1].width;
-  }
-
   get heightMm() {
     return this.transitionPoints[this.transitionPoints.length - 1].distanceFromBottom;
-  }
-
-  get widthPx() {
-    return this.widthMm / this.millimetersPerPixel;
   }
 
   get heightPx() {
     return this.heightMm / this.millimetersPerPixel;
   }
 
-  createCanvasPlastic(parentId, offsetX, offsetY) {
-    this.canvasPlastic = new Canvas2d(this.widthPx, this.heightPx, parentId, offsetX, offsetY);
+  get widthMmPlastic() {
+    return this.transitionPoints[this.transitionPoints.length - 1].width;
   }
 
-  createCanvasForAction(action, parentId, offsetX, offsetY) {
-    let widthPx = 0.0;
+  get widthPxPlastic() {
+    return this.widthMm / this.millimetersPerPixel;
+  }
+
+  getWidthPxAction(action) {
     if (action == "aspirate") {
       if (!this.aspirateDuration) {
         throw new Error(`[${this.name}] aspirate duration: ${this.aspirateDuration}`);
       }
-      widthPx = this.aspirateDuration / this.secondsPerPixel;
+      return this.aspirateDuration / this.secondsPerPixel;
     }
     else if (action === "singleDispense") {
       if (!this.singleDispenseDuration) {
         throw new Error(`[${this.name}] singleDispense duration: ${this.singleDispenseDuration}`);
       } 
-      widthPx = this.singleDispenseDuration / this.secondsPerPixel;
+      return this.singleDispenseDuration / this.secondsPerPixel;
     }
-    else {
-      throw new Error(`unexpected action: ${action}`);
+    throw new Error(`unexpected action: ${action}`);
+  }
+
+  createCanvasPlastic(parentId) {
+    const w = this.widthPx;
+    const h = this.heightPx;
+    this.canvasPlastic = new Canvas2d(w, h, parentId);
+  }
+
+  createCanvasForAction(action, parentId) {
+    const w = this.getWidthPxAction(action);
+    const h = this.heightPx;
+    this.canvasesActions[action] = new Canvas2d(w, h, parentId);
+  }
+
+  setCanvasPositionPlastic(offsetFromCenterX, offsetFromTopY) {
+    this.canvasPlastic.setPosition(offsetFromCenterX, offsetFromTopY);
+    this.canvasPlastic.updatePosition();
+  }
+
+  setCanvasPositionForAction(action, offsetFromCenterX, offsetFromTopY) {
+    this.canvasesActions[action].setPosition(offsetFromCenterX, offsetFromTopY);
+    this.canvasesActions[action].updatePosition();
+  }
+
+  updateCanvasPositions() {
+    this.canvasPlastic.updatePosition();
+    for (let action in this.canvasesActions) {
+      if (this.canvasesActions[action]) {
+        this.canvasesActions[action].updatePosition();
+      }
     }
-    this.canvasesActions[action] = new Canvas2d(widthPx, this.heightPx, parentId, offsetX, offsetY);
   }
 
   remove() {
-    if (this.canvasPlasic) {
-      this.canvasPlasic.remove();
+    if (this.canvasPlastic) {
+      this.canvasPlastic.remove();
     }
-    this.canvasPlasic = undefined;
+    this.canvasPlastic = undefined;
     for (let c of this.canvasesActions) {
       c.remove();
     }

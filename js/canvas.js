@@ -57,7 +57,7 @@ export class Canvas2d {
     this.width = Math.floor(width);
     this.height = Math.floor(height);
     const { canvas, state, removeEventHandlers } =
-      Canvas2d.createCanvas(this.width, this.height, parentId, offsetFromCenterX, offsetFromTopY);
+      Canvas2d.createCanvas(this.width, this.height, parentId);
     this.canvas = canvas;
     this.state = state;
     this.removeEventListeners = removeEventHandlers;
@@ -66,24 +66,10 @@ export class Canvas2d {
     this.doFill = true;
     this.doStroke = true;
 
-    this.offsetFromCenterX = offsetFromCenterX;
-    this.offsetFromTopY = offsetFromTopY;
+    this.offsetFromCenterX = undefined;
+    this.offsetFromTopY = undefined;
+    this.setPosition(0, 0);
     this.updatePosition();
-  }
-
-  remove() {
-    this.removeEventListeners();
-    this.canvas.remove();
-    this.ctx = null;
-    this.canvas = null;
-  }
-
-  save() {
-    this.ctx.save();
-  }
-
-  restore() {
-    this.ctx.restore();
   }
 
   static createCanvas(width, height, parentId) {
@@ -102,6 +88,11 @@ export class Canvas2d {
     return { canvas, state, removeEventHandlers };
   }
 
+  setPosition(offsetFromCenterX, offsetFromTopY) {
+    this.offsetFromCenterX = offsetFromCenterX;
+    this.offsetFromTopY = offsetFromTopY;
+  }
+
   updatePosition() {
     const parentRect = this.canvas.parentNode.getBoundingClientRect();
     const x = (parentRect.width / 2) + this.offsetFromCenterX - (this.width / 2);
@@ -109,6 +100,21 @@ export class Canvas2d {
     this.canvas.style.position = 'absolute';
     this.canvas.style.left = `${x}px`;
     this.canvas.style.top = `${y}px`;
+  }
+
+  remove() {
+    this.removeEventListeners();
+    this.canvas.remove();
+    this.ctx = null;
+    this.canvas = null;
+  }
+
+  save() {
+    this.ctx.save();
+  }
+
+  restore() {
+    this.ctx.restore();
   }
 
   translate(x, y) {

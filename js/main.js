@@ -10,7 +10,7 @@ const secondsPerPixel = 0.01;
 const main = async () => {
   const view = new View(defaultView);
   await view.initialize(parentNodeId, mmPerPixel, secondsPerPixel);
-
+  view.draw();
 }
 
 document.addEventListener('DOMContentLoaded', main);

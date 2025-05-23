@@ -112,24 +112,18 @@ export class View {
 
 
     if (!isWell) {
-      vessel.createCanvasForAction("aspirate", this.parentId);
-      vessel.drawAction("aspirate", this.aspirateKeyFrames, this.patterns);
+      // TIP
       vessel.createCanvasPlastic(this.parentId);
-      vessel.drawPlastic(this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1]);
+      vessel.createCanvasForAction("aspirate", this.parentId);
       vessel.createCanvasForAction("singleDispense", this.parentId);
-      vessel.drawAction("singleDispense", this.singleDispenseKeyFrames, this.patterns);
     }
     else if (aspDuration) {
       vessel.createCanvasPlastic(this.parentId);
-      vessel.drawPlastic(this.aspirateKeyFrames[0]);
       vessel.createCanvasForAction("aspirate", this.parentId);
-      vessel.drawAction("aspirate", this.aspirateKeyFrames, this.patterns);
     }
     else if (dispDuration) {
-      vessel.createCanvasForAction("singleDispense", this.parentId);
-      vessel.drawAction("singleDispense", this.singleDispenseKeyFrames, this.patterns);
       vessel.createCanvasPlastic(this.parentId);
-      vessel.drawPlastic(this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1]);
+      vessel.createCanvasForAction("singleDispense", this.parentId);
     }
     return vessel;
   }
@@ -148,6 +142,79 @@ export class View {
     this.srcVessel = this.createNewVessel(this.cfg.srcName, this.loadedSrc.transitionPoints);
     this.tipVessel = this.createNewVessel(this.cfg.tipName, this.loadedTip.transitionPoints);
     this.dstVessel = this.createNewVessel(this.cfg.dstName, this.loadedDst.transitionPoints);
+
+    const srcPlasticCanvasWidth = this.srcVessel.canvasPlastic.width;
+    const dstPlasticCanvasWidth = this.dstVessel.canvasPlastic.width;
+    const tipPlasticCanvasWidth = this.tipVessel.canvasPlastic.width;
+    const tipPlasticCanvasHeight = this.tipVessel.canvasPlastic.height;
+    const tipAspirateCanvasWidth = this.tipVessel.canvasesActions["aspirate"].width;
+
+    // NOTE: coordinates are:
+    //          (x) offset from center, negative is to the left
+    //          (y) distance from top of screen, positive is downward
+    const padding = 10.0;
+    // TIP
+    const tipPlasticXY = {
+      "x": -tipPlasticCanvasWidth / 2.0,
+      "y": padding
+    };
+    // ASPIRATE + DISPENSE inside the TIP
+    const tipAspirateXY = {
+      "x": -tipAspirateCanvasWidth + -padding + tipPlasticXY.x,
+      "y": padding
+    };
+    const tipDispenseXY = {
+      "x": padding + -tipPlasticXY.x,
+      "y": padding
+    };
+    // ASPIRATE inside the WELL
+    const srcAspirateXY = {
+      "x": tipAspirateXY.x,
+      "y": tipAspirateXY.y + padding + tipPlasticCanvasHeight
+    };
+    // DISPENSE inside the WELL
+    const dstDispenseXY = {
+      "x": tipDispenseXY.x,
+      "y": tipDispenseXY.y + padding + tipPlasticCanvasHeight
+    };
+    // WELLS
+    const srcPlasticXY = {
+      "x": srcAspirateXY.x + -padding + -srcPlasticCanvasWidth,
+      "y": srcAspirateXY.y
+    };
+    const dstPlasticXY = {
+      "x": dstDispenseXY.x + padding + dstPlasticCanvasWidth,
+      "y": dstDispenseXY.y
+    };
+    
+    this.tipVessel.setCanvasPositionPlastic(tipPlasticXY.x, tipPlasticXY.y);
+    this.tipVessel.setCanvasPositionForAction("aspirate", tipAspirateXY.x, tipAspirateXY.y);
+    this.tipVessel.setCanvasPositionForAction("singleDispense", tipDispenseXY.x, tipDispenseXY.y);
+    this.srcVessel.setCanvasPositionPlastic(srcPlasticXY.x, srcPlasticXY.y);
+    this.srcVessel.setCanvasPositionForAction("aspirate", srcAspirateXY.x, srcAspirateXY.y);
+    this.dstVessel.setCanvasPositionPlastic(dstPlasticXY.x, dstPlasticXY.y);
+    this.dstVessel.setCanvasPositionForAction("singleDispense", dstDispenseXY.x, dstDispenseXY.y);
+
+    this.updateVesselPositions();
+  }
+
+  updateVesselPositions() {
+    this.srcVessel.updateCanvasPositions();
+    this.tipVessel.updateCanvasPositions();
+    this.dstVessel.updateCanvasPositions();
+  }
+
+  draw() {
+    // SRC
+    this.srcVessel.drawPlastic(this.aspirateKeyFrames[0]);
+    this.srcVessel.drawAction("aspirate", this.aspirateKeyFrames, this.patterns);
+    // TIP
+    this.tipVessel.drawAction("aspirate", this.aspirateKeyFrames, this.patterns);
+    this.tipVessel.drawPlastic(this.aspirateKeyFrames[this.aspirateKeyFrames.length - 1]);
+    this.tipVessel.drawAction("singleDispense", this.singleDispenseKeyFrames, this.patterns);
+    // DST
+    this.dstVessel.drawAction("singleDispense", this.singleDispenseKeyFrames, this.patterns);
+    this.dstVessel.drawPlastic(this.singleDispenseKeyFrames[this.singleDispenseKeyFrames.length - 1]);
   }
 
   remove() {
